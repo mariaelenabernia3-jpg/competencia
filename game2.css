@@ -36,25 +36,26 @@ body {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(1);
-    width: 200px; /* Ajusta el tamaño según tu imagen */
+    width: 200px;
     transition: all 1.5s ease-in-out;
     z-index: 500;
 }
 #character-container img { max-width: 100%; animation: fadeIn 1s; }
 #character-dialogue {
     position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-    background: var(--panel-bg); border: 1px solid var(--primary-color);
-    padding: 10px 15px; border-radius: 10px; width: 250px;
-    margin-bottom: 15px; text-align: center; font-size: 1.1rem;
+    background: var(--panel-bg); border: 2px solid var(--primary-color);
+    padding: 10px 15px; border-radius: 10px; width: 280px;
+    margin-bottom: 15px; text-align: center; font-size: 1.2rem;
+    box-shadow: 0 0 15px var(--primary-color);
 }
 /* Estado del personaje en la esquina */
 #character-container.in-corner {
     top: 100%; left: 0;
-    transform: translate(10px, -110%) scale(0.6); /* Ajusta la escala y posición final */
+    transform: translate(10px, -110%) scale(0.6);
 }
 
 /* --- Interfaz Principal --- */
-#main-interface { display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 20px; height: 100vh; animation: fadeIn 1s; }
+#main-interface { display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 20px; height: 100vh; animation: fadeIn 1s; box-sizing: border-box; }
 .panel { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 15px; box-shadow: 0 0 10px rgba(0, 255, 0, 0.2); }
 #left-panel, #right-panel { display: flex; flex-direction: column; gap: 20px; width: 300px; }
 #stats-panel h3, #actions-panel h3 { margin: 0 0 15px 0; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
@@ -75,7 +76,7 @@ body {
 .shop-content { width: 90%; max-width: 500px; }
 .shop-content h2 { text-align: center; margin-top: 0; }
 #shop-items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-.shop-item { display: flex; justify-content: space-between; align-items: center; }
+.shop-item { display: flex; justify-content: space-between; align-items: center; padding: 5px; }
 
 /* --- Elementos Comunes (Botones, etc.) --- */
 button {
