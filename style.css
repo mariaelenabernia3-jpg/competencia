@@ -4,53 +4,24 @@ body { margin: 0; padding: 0; display: flex; justify-content: center; align-item
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; display: flex; justify-content: center; align-items: center; flex-direction: column; }
 
 /* --- NUEVO: ESTILOS PARA EL OVERLAY DE BLOQUEO --- */
-#enforce-view-overlay {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.95);
-    color: #fff;
-    z-index: 10000;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: 'VT323', monospace, sans-serif;
-    text-align: center;
-    padding: 20px;
-}
-#enforce-view-overlay.visible {
-    display: flex; /* Se muestra cuando tiene la clase 'visible' */
-}
-.enforce-view-content {
-    border: 2px solid #ff00ff;
-    padding: 30px;
-    box-shadow: 0 0 20px #ff00ff;
-}
-.enforce-view-content h2 {
-    color: #ff00ff;
-    font-size: 1.8rem;
-}
-.enforce-view-content p {
-    font-size: 1.2rem;
-    line-height: 1.6;
-}
+#enforce-view-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.95); color: #fff; z-index: 10000; flex-direction: column; justify-content: center; align-items: center; font-family: 'VT323', monospace, sans-serif; text-align: center; padding: 20px; }
+#enforce-view-overlay.visible { display: flex; }
+.enforce-view-content { border: 2px solid #ff00ff; padding: 30px; box-shadow: 0 0 20px #ff00ff; }
+.enforce-view-content h2 { color: #ff00ff; font-size: 1.8rem; }
+.enforce-view-content p { font-size: 1.2rem; line-height: 1.6; }
 
-/* --- INTRODUCCIÓN (CON FONDO NEGRO SÓLIDO) --- */
+/* --- INTRODUCCIÓN --- */
 .intro-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-family: 'VT323', monospace; }
 #language-selector h2 { font-size: 2rem; } #language-selector button { font-family: 'VT323', monospace; background: none; border: 1px solid #fff; color: #fff; padding: 15px 30px; font-size: 1.5rem; margin: 10px; cursor: pointer; }
 #language-selector button:hover { background: #fff; color: #000; }
 #lore-screen { cursor: pointer; } #lore-text { font-size: 2rem; max-width: 80%; } #continue-prompt { font-size: 1rem; color: #888; margin-top: 50px; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-/* --- PRELOADER (CON FONDO NEGRO SÓLIDO) --- */
+/* --- PRELOADER --- */
 #preloader #boot-sequence { width: 90%; max-width: 600px; text-align: left; color: #00ff00; font-size: 1.5rem; }
 .cursor { display: inline-block; background-color: #00ff00; width: 0.8rem; height: 1.6rem; animation: blink 1s step-end infinite; }
 @keyframes blink { from, to { background-color: transparent; } 50% { background-color: #00ff00; } }
 
-/* [ El resto del CSS sigue igual... ] */
 /* --- MENÚ PRINCIPAL --- */
 #main-menu { display: none; width: 90%; z-index: 10; }
 .glitch-title { font-family: 'Press Start 2P', cursive; font-size: 3.5rem; color: #fff; position: relative; text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff, 0 0 20px #00bfff, 0 0 40px #ff00ff, 0 0 80px #ff00ff; animation: title-glitch 1.5s infinite linear alternate-reverse; word-wrap: break-word; }
@@ -76,25 +47,26 @@ body { margin: 0; padding: 0; display: flex; justify-content: center; align-item
 .language-buttons button { font-size: 1rem; padding: 8px 15px; } input[type="range"] { width: 80%; }
 
 /* --- TEMAS --- */
-.theme-8bit { background-image: url('fondo-8-bit.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+/* ARREGLO: Rutas actualizadas a la carpeta de imágenes */
+.theme-8bit { background-image: url('imagenes/fondo-8-bit.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
 .theme-8bit button { font-family: 'Press Start 2P', cursive; background-color: rgba(34, 34, 34, 0.7); border: 2px solid #FFF; color: #FFF; padding: 15px 30px; font-size: 1.2rem; margin: 10px; cursor: pointer; text-transform: uppercase; text-shadow: 2px 2px #000; }
 .theme-8bit .overlay { background-color: rgba(0,0,0,0.9); border: 4px solid #FFF; color: #FFF; }
 .theme-8bit .dialogue-bubble { background-color: #333; }
 .theme-8bit .save-slot { border: 2px solid #FFF; } .theme-8bit .save-slot.used { background-color: #555; }
 
-.theme-cyberpunk { background-image: url('fondo-cyberpunk.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+.theme-cyberpunk { background-image: url('imagenes/fondo-cyberpunk.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
 .theme-cyberpunk button { font-family: 'VT323', monospace; background: rgba(0,0,0,0.2); border: 1px solid #0F0; color: #0F0; padding: 15px 30px; font-size: 1.8rem; margin: 10px; cursor: pointer; text-transform: uppercase; text-shadow: 0 0 5px #000; }
 .theme-cyberpunk .overlay { background-color: rgba(13,13,13,0.8); backdrop-filter: blur(5px); color: #0F0; border: 1px solid #0F0;}
 .theme-cyberpunk .dialogue-bubble { background-color: rgba(0, 255, 0, 0.1); border-left: 2px solid #0F0; }
 .theme-cyberpunk .save-slot { border: 1px solid #0F0; } .theme-cyberpunk .save-slot.used { background-color: rgba(0, 255, 0, 0.15); }
 
-.theme-medieval { background-image: url('fondo-medieval.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
-.theme-medieval button { font-family: 'MedievalSharp', cursive; background: #e6dcc9; border-style: solid; border-width: 24px; border-image: url('borde-medieval.png') 24 stretch; color: #5a3d33; padding: 10px 20px; font-size: 1.5rem; margin: 10px; cursor: pointer; text-transform: capitalize; transition: transform 0.2s; text-shadow: 1px 1px 2px #000; }
-.theme-medieval .overlay { background-color: rgba(245, 240, 225, 0.95); border-style: solid; border-width: 32px; border-image: url('borde-medieval.png') 32 stretch; color: #5a3d33; }
+.theme-medieval { background-image: url('imagenes/fondo-medieval.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+.theme-medieval button { font-family: 'MedievalSharp', cursive; background: #e6dcc9; border-style: solid; border-width: 24px; border-image: url('imagenes/borde-medieval.png') 24 stretch; color: #5a3d33; padding: 10px 20px; font-size: 1.5rem; margin: 10px; cursor: pointer; text-transform: capitalize; transition: transform 0.2s; text-shadow: 1px 1px 2px #000; }
+.theme-medieval .overlay { background-color: rgba(245, 240, 225, 0.95); border-style: solid; border-width: 32px; border-image: url('imagenes/borde-medieval.png') 32 stretch; color: #5a3d33; }
 .theme-medieval .dialogue-bubble { background-color: #d8c8a8; }
 .theme-medieval .save-slot { border: 2px solid #5a3d33; } .theme-medieval .save-slot.used { background-color: #c9b999; }
 
-.theme-modern { background-image: url('fondo-moderno.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+.theme-modern { background-image: url('imagenes/fondo-moderno.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
 .theme-modern button { font-family: Arial, sans-serif; background-color: #333; border: none; border-radius: 50px; color: #FFF; padding: 20px 40px; font-size: 1rem; margin: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: transform 0.2s ease, box-shadow 0.2s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
 .theme-modern .overlay { background-color: rgba(255,255,255,0.7); backdrop-filter: blur(10px); color: #333; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
 .theme-modern .dialogue-bubble { background-color: #eee; }
@@ -114,10 +86,6 @@ body { margin: 0; padding: 0; display: flex; justify-content: center; align-item
 
 #version-info { position: fixed; bottom: 10px; right: 15px; font-size: 0.7rem; color: rgba(128, 128, 128, 0.7); pointer-events: none; z-index: 100; }
 
-/* --- MEDIA QUERIES PARA MÓVILES --- */
-@media (max-height: 500px) and (orientation: landscape) {
-    .glitch-title { font-size: 2.5rem; margin-bottom: 10px; }
-    .menu-options button { font-size: 1rem; padding: 10px 20px; margin: 5px !important; }
-    .overlay-content { padding: 20px; }
-}
+/* --- MEDIA QUERIES --- */
+@media (max-height: 500px) and (orientation: landscape) { .glitch-title { font-size: 2.5rem; margin-bottom: 10px; } .menu-options button { font-size: 1rem; padding: 10px 20px; margin: 5px !important; } .overlay-content { padding: 20px; } }
 @media (max-width: 768px) { .glitch-title { font-size: 2.2rem; } button { width: 80%; margin: 15px auto !important; } #first-time-dialogue, #lore-text, #language-selector h2 { font-size: 1.2rem; } }
