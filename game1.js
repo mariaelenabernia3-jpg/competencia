@@ -203,14 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
     }
 
-    // --- FUNCIÓN DE DIBUJADO PRINCIPAL (REESTRUCTURADA) ---
+   
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (!assets.ground || !assets.player) {
             ctx.fillStyle = 'red'; ctx.font = '20px monospace'; ctx.textAlign = 'center'; ctx.fillText(gameTexts.errorTitle[currentLanguage], canvas.width / 2, canvas.height / 2); ctx.fillText(gameTexts.errorSubtitle[currentLanguage], canvas.width / 2, canvas.height / 2 + 30); return;
         }
 
-        // --- 1. DIBUJAR EL MUNDO DEL JUEGO ---
+        
         ctx.save();
         const scale = canvas.height / BASE_HEIGHT;
         const offsetX = (canvas.width - BASE_WIDTH * scale) / 2;
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         ctx.restore();
 
-        // --- 2. DIBUJAR LA INTERFAZ (UI) Y OVERLAYS ---
+     
         if (gameState === 'SPLASH_SCREEN') {
             ctx.fillStyle = `rgba(0, 0, 0, ${splashAlpha * 0.7})`; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.save(); ctx.globalAlpha = splashAlpha; ctx.textAlign = 'center'; ctx.font = '90px monospace'; ctx.fillStyle = 'white'; ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; ctx.shadowBlur = 10; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 5; ctx.fillText('Acto 1', canvas.width / 2, canvas.height / 2); ctx.font = '45px monospace'; ctx.fillStyle = '#FFD700'; ctx.shadowColor = 'transparent'; ctx.fillText('Plataformas', canvas.width / 2, canvas.height / 2 + 60); ctx.restore();
         } else if (gameState === 'DIALOGUE') {
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'; ctx.fillRect(10, boxY, canvas.width - 20, boxHeight); ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 2; ctx.strokeRect(10, boxY, canvas.width - 20, boxHeight); ctx.fillStyle = '#fff'; ctx.font = '30px monospace'; ctx.textAlign = 'left'; ctx.fillText(gameTexts.dialogue[currentLanguage][currentDialogueIndex], 30, boxY + 50);
         } else if (gameState === 'MISSION') {
             ctx.save(); ctx.globalAlpha = missionAlpha; ctx.textAlign = 'center'; ctx.font = '50px monospace'; ctx.fillStyle = 'white'; ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; ctx.shadowBlur = 10; ctx.fillText(gameTexts.missionTitle[currentLanguage], canvas.width / 2, canvas.height / 2 - 30); ctx.font = '35px monospace'; ctx.fillStyle = '#FFD700'; ctx.fillText(gameTexts.missionObjective[currentLanguage], canvas.width / 2, canvas.height / 2 + 30); ctx.restore();
-        } else if (gameState === 'PLAYING' || gameState === 'HEAL_BUTTON_PROMPT') { // Mostrar HUD en ambos estados
+        } else if (gameState === 'PLAYING' || gameState === 'HEAL_BUTTON_PROMPT') { 
             ctx.fillStyle = 'white'; ctx.font = '40px monospace'; ctx.textAlign = 'left';
             ctx.fillText(`${gameTexts.score[currentLanguage]}: ${score}`, 20, 50);
             ctx.fillText(`${gameTexts.health[currentLanguage]}: ${health}`, 20, 90);
@@ -259,7 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Bucle Principal del Juego ---
     function gameLoop() {
         if (gameState === 'SYSTEM_ALERT_INTRO') { updateSystemAlert('HEAL_BUTTON_PROMPT');
         } else if (gameState === 'PLAYING') { updatePlaying();
@@ -273,3 +272,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loadAssets(initializeGame);
 });
+
