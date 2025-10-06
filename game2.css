@@ -1,14 +1,55 @@
 body {
     margin: 0;
-    padding: 20px;
+    padding: 0;
     font-family: 'VT323', monospace;
     background-color: #0d0d0d;
     color: #00ff00;
+    overflow: hidden; /* Evita barras de scroll */
+}
+
+/* ===== NUEVO: Estilos para el Overlay de Introducción ===== */
+#lore-intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    text-align: center;
+    cursor: pointer;
+    padding: 20px;
     box-sizing: border-box;
+}
+
+.lore-content {
+    max-width: 800px;
+}
+
+#lore-text {
+    font-size: 2.5rem;
+    color: #fff;
+    text-shadow: 0 0 8px #fff;
+}
+
+#continue-prompt {
+    font-size: 1.2rem;
+    color: #888;
+    margin-top: 50px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+/* ===== FIN DE NUEVOS ESTILOS ===== */
+
+.hidden {
+    display: none !important;
 }
 
 #game-container {
@@ -18,6 +59,7 @@ body {
     box-shadow: 0 0 15px #00ff00;
     padding: 20px;
     background-color: rgba(0, 15, 0, 0.5);
+    margin: 20px;
 }
 
 header {
@@ -38,104 +80,4 @@ header {
     padding: 10px;
     margin-top: 15px;
     min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#dialogue-text {
-    font-style: italic;
-    font-size: 1.2rem;
-}
-
-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-#stats-container {
-    display: flex;
-    gap: 30px;
-    font-size: 1.5rem;
-    text-align: center;
-}
-
-.stat h2 {
-    font-size: 1rem;
-    margin: 0 0 5px 0;
-}
-
-#clicker-container {
-    margin: 20px 0;
-}
-
-#main-clicker-btn {
-    font-family: 'VT323', monospace;
-    font-size: 1.8rem;
-    padding: 20px 40px;
-    cursor: pointer;
-    background-color: transparent;
-    border: 2px solid #00ff00;
-    color: #00ff00;
-    text-shadow: 0 0 5px #0f0;
-    transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-#main-clicker-btn:hover {
-    background-color: rgba(0, 255, 0, 0.1);
-    box-shadow: 0 0 10px #0f0;
-}
-
-#main-clicker-btn:active {
-    background-color: rgba(0, 255, 0, 0.2);
-    transform: translateY(2px);
-}
-
-#upgrades-container {
-    border-top: 1px solid #00ff00;
-    margin-top: 20px;
-    padding-top: 15px;
-}
-
-#upgrades-container h2 {
-    text-align: center;
-}
-
-#upgrades-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.upgrade-btn {
-    font-family: 'VT323', monospace;
-    font-size: 1.1rem;
-    padding: 15px;
-    background-color: #111;
-    border: 1px solid #00ff00;
-    color: #00ff00;
-    cursor: pointer;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.upgrade-btn:hover:not(:disabled) {
-    background-color: rgba(0, 255, 0, 0.1);
-}
-.upgrade-btn:disabled {
-    color: #555;
-    border-color: #333;
-    cursor: not-allowed;
-}
-
-.upgrade-info {
-    flex-grow: 1;
-}
-
-.upgrade-cost {
-    font-weight: bold;
-    font-size: 1.2rem;
 }
