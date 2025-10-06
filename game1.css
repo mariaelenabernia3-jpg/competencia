@@ -1,11 +1,11 @@
 body {
     margin: 0;
-    /* NUEVO: Fondo del juego */
-    background-image: url('fondo-game1.png');
-    background-color: #111; /* Color si la imagen no carga */
-    background-size: cover; /* Asegura que la imagen cubra toda la pantalla */
-    background-position: center; /* Centra la imagen */
-    background-attachment: fixed; /* Fija el fondo para efecto parallax */
+    /* ARREGLO: Se actualiza la ruta de la imagen de fondo */
+    background-image: url('imagenes/fondo-game1.png');
+    background-color: #111;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     
     display: flex;
     justify-content: center;
@@ -14,14 +14,12 @@ body {
     overflow: hidden;
 }
 
-/* NUEVO: El canvas ahora es transparente para que se vea el fondo del body */
 canvas {
     width: 100vw;
     height: 100vh;
     background-color: transparent;
 }
 
-/* --- NUEVO: ESTILOS PARA EL OVERLAY DE BLOQUEO --- */
 #enforce-view-overlay {
     display: none;
     position: fixed;
@@ -56,7 +54,6 @@ canvas {
     line-height: 1.6;
 }
 
-/* --- ESTILOS PARA CONTROLES MÓVILES --- */
 #controls {
     position: fixed;
     bottom: 20px;
@@ -84,7 +81,6 @@ canvas {
 #btn-right { bottom: 0; left: 100px; }
 #btn-jump { bottom: 0; right: 20px; }
 
-/* --- PANTALLA DE ROTACIÓN --- */
 #rotate-screen {
     display: none;
     position: fixed;
