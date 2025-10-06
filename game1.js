@@ -38,6 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDialogueIndex = 0; let dialogueLineTimer = 0; const DIALOGUE_LINE_DURATION = 180;
     let missionAlpha = 0, missionPhase = 'FADING_IN', missionHoldTimer = 0; const MISSION_HOLD_DURATION = 180;
     let systemAlertAlpha = 0, systemAlertPhase = 'FADING_IN', systemAlertTimer = 0; const SYSTEM_ALERT_HOLD_DURATION = 300;
+    
+    // --- NUEVO: Variables para el efecto de texto glitch ---
+    let systemAlertTextProgress = 0;
+    let systemAlertGlitchedText = "";
+    const GLITCH_CHAR_SET = '█▓▒░abcdefghijklmnopqrstuvwxyz0123456789!?@#$%&/\\';
+    const TEXT_REVEAL_SPEED = 2; // Revela 1 carácter cada 2 fotogramas.
+    let textRevealCounter = 0;
+    // --- FIN DE NUEVAS VARIABLES ---
+
     let timedDialogue = { text: null, timer: 0 };
     let goodCoinsCollected = 0;
     let hasJumpedOnce = false, hasCollectedFirstCoin = false, hasTriggered7CoinDialogue = false;
@@ -120,6 +129,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateSystemAlert(nextStateOnFinish) {
         const FADE_SPEED = 0.025;
+
+        // --- NUEVO: Lógica para generar el texto glitcheado en cada fotograma ---
+        const originalText = gameTexts.systemAlertIntro[currentLanguage];
+        
+        // Controlar la velocidad de revelado del texto
+        textRevealCounter++;
+        if (textRevealCounter >= TEXT_REVEAL_SPEED && systemAlertTextProgress < originalText.length) {
+            systemAlertTextProgress++;
+            textRevealCounter = 0;
+        }
+
+        // Construir la cadena de texto glitcheada
+        let revealedPart = originalText.substring(0, systemAlertTextProgress);
+        let glitchedPart = "";
+        for (let i = systemAlertTextProgress; i < originalText.length; i++) {
+            // No reemplazar espacios para mantener la estructura de las palabras
+            if (originalText[i] === ' ') {
+                glitchedPart += ' ';
+            } else {
+                const randomIndex = Math.floor(Math.random() * GLITCH_CHAR_SET.length);
+                glitchedPart += GLITCH_CHAR_SET[randomIndex];
+            }
+        }
+        systemAlertGlitchedText = revealedPart + glitchedPart;
+        // --- FIN DE LA NUEVA LÓGICA ---
+
         if (systemAlertPhase === 'FADING_IN') { systemAlertAlpha += FADE_SPEED; if (systemAlertAlpha >= 1) { systemAlertAlpha = 1; systemAlertPhase = 'HOLDING'; } }
         else if (systemAlertPhase === 'HOLDING') { systemAlertTimer++; if (systemAlertTimer >= SYSTEM_ALERT_HOLD_DURATION) { systemAlertPhase = 'FADING_OUT'; } }
         else if (systemAlertPhase === 'FADING_OUT') {
@@ -167,6 +202,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         hasTriggeredSystemSequence = true;
                         gameState = 'SYSTEM_ALERT_INTRO';
                         systemAlertPhase = 'FADING_IN'; systemAlertAlpha = 0; systemAlertTimer = 0;
+                        // --- NUEVO: Reiniciar el estado del texto para el efecto ---
+                        systemAlertTextProgress = 0;
+                        systemAlertGlitchedText = "";
+                        textRevealCounter = 0;
+                        // --- FIN DE LA MODIFICACIÓN ---
                     }
                 }
             }
@@ -255,7 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState === 'SYSTEM_ALERT_INTRO') {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            drawSystemAlert(gameTexts.systemAlertIntro[currentLanguage]);
+            // --- MODIFICADO: Usar el texto glitcheado dinámico ---
+            drawSystemAlert(systemAlertGlitchedText);
+            // --- FIN DE LA MODIFICACIÓN ---
         }
     }
 
@@ -272,4 +314,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loadAssets(initializeGame);
 });
-
