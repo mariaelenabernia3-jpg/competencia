@@ -111,14 +111,14 @@ canvas {
     }
 }
 
-/* ESTILOS PARA EL OVERLAY Y BOTÓN DE CURACIÓN */
+
 #heal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10001; /* Muy alto para que esté por encima de todo */
+    z-index: 10001;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -158,3 +158,4 @@ canvas {
         box-shadow: 0 0 30px #ff4757;
     }
 }
+
