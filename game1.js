@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const healOverlay = document.getElementById('heal-overlay');
     const healButton = document.getElementById('heal-button');
+    
+    // Selector para la pantalla de carga de transición
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingDialogue = document.getElementById('loading-dialogue');
 
     const currentLanguage = localStorage.getItem('eg_language') || 'es';
 
@@ -20,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sevenCoinsDialogue: { es: "Anoche no sé qué tenía la sopa... me dormí y terminé aquí.", en: "I don't know what was in the soup last night... I fell asleep and ended up here." },
         fifthCoinConditionalDialogue: { es: "A ver, vamos a calmarnos... no fue tu culpa, ¡pero puedo morir!", en: "Okay, let's calm down... it wasn't your fault, but I can die!" },
         systemAlertIntro: { es: "Bienvenido al Internet. Vas a presenciar todo tipo de géneros de juego. Por ser nuevo, te daré un regalo.", en: "Welcome to the Internet. You will witness all kinds of game genres. As you are new, I will give you a gift." },
-        postHealDialogue: { es: "¡Qué bien! Estoy como nuevo.", en: "Alright! I'm good as new." }
+        postHealDialogue: { es: "¡Qué bien! Estoy como nuevo.", en: "Alright! I'm good as new." },
+        transitionDialogue: { es: "Aquí vamos de nuevo...", en: "Here we go again..." }
     };
 
     const BASE_WIDTH = 800;
@@ -39,20 +44,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let missionAlpha = 0, missionPhase = 'FADING_IN', missionHoldTimer = 0; const MISSION_HOLD_DURATION = 180;
     let systemAlertAlpha = 0, systemAlertPhase = 'FADING_IN', systemAlertTimer = 0; const SYSTEM_ALERT_HOLD_DURATION = 300;
     
-    // --- NUEVO: Variables para el efecto de texto glitch ---
+    // Variables para el efecto de texto glitch
     let systemAlertTextProgress = 0;
     let systemAlertGlitchedText = "";
     const GLITCH_CHAR_SET = '█▓▒░abcdefghijklmnopqrstuvwxyz0123456789!?@#$%&/\\';
-    const TEXT_REVEAL_SPEED = 2; // Revela 1 carácter cada 2 fotogramas.
+    const TEXT_REVEAL_SPEED = 2;
     let textRevealCounter = 0;
-    // --- FIN DE NUEVAS VARIABLES ---
 
     let timedDialogue = { text: null, timer: 0 };
     let goodCoinsCollected = 0;
     let hasJumpedOnce = false, hasCollectedFirstCoin = false, hasTriggered7CoinDialogue = false;
     let hasTakenDamage = false, hasTriggeredSystemSequence = false;
-    const TIMED_DIALOGUE_DURATION = 300;
+    let isTransitioning = false; // Bandera para la transición final
 
+    const TIMED_DIALOGUE_DURATION = 300;
     const GRAVITY = 0.5, MOVE_SPEED = 5, JUMP_FORCE = 15;
     const PLAYER_VISUAL_OFFSET_Y = 5, DECORATION_SIZE = 50, COIN_SIZE = 35;
     const FRAME_WIDTH = 33, FRAME_HEIGHT = 42, FRAME_SPEED = 4;
@@ -79,9 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
         goodCoinsCollected = 0;
         hasJumpedOnce = false; hasCollectedFirstCoin = false; hasTriggered7CoinDialogue = false;
         hasTakenDamage = false; hasTriggeredSystemSequence = false;
+        isTransitioning = false;
         if (assets.ground) { groundPattern = ctx.createPattern(assets.ground, 'repeat'); }
         platforms = [ { x: -1000, y: 590, width: 10000, height: 50 }, { x: 200, y: 450, width: 150, height: 20 }, { x: 450, y: 350, width: 150, height: 20 }, { x: 700, y: 450, width: 200, height: 20 }, { x: 1000, y: 400, width: 150, height: 20 }, { x: 1200, y: 300, width: 150, height: 20 }, { x: 1400, y: 200, width: 50, height: 20 }, { x: 1600, y: 350, width: 250, height: 20 }, { x: 1950, y: 280, width: 150, height: 20 } ];
-        decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DECORATION_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
+        decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DEcoration_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
         coins = [ { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false }, { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false }, { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false }, ];
         gameLoop();
     }
@@ -129,22 +135,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateSystemAlert(nextStateOnFinish) {
         const FADE_SPEED = 0.025;
-
-        // --- NUEVO: Lógica para generar el texto glitcheado en cada fotograma ---
         const originalText = gameTexts.systemAlertIntro[currentLanguage];
         
-        // Controlar la velocidad de revelado del texto
         textRevealCounter++;
         if (textRevealCounter >= TEXT_REVEAL_SPEED && systemAlertTextProgress < originalText.length) {
             systemAlertTextProgress++;
             textRevealCounter = 0;
         }
 
-        // Construir la cadena de texto glitcheada
         let revealedPart = originalText.substring(0, systemAlertTextProgress);
         let glitchedPart = "";
         for (let i = systemAlertTextProgress; i < originalText.length; i++) {
-            // No reemplazar espacios para mantener la estructura de las palabras
             if (originalText[i] === ' ') {
                 glitchedPart += ' ';
             } else {
@@ -153,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         systemAlertGlitchedText = revealedPart + glitchedPart;
-        // --- FIN DE LA NUEVA LÓGICA ---
 
         if (systemAlertPhase === 'FADING_IN') { systemAlertAlpha += FADE_SPEED; if (systemAlertAlpha >= 1) { systemAlertAlpha = 1; systemAlertPhase = 'HOLDING'; } }
         else if (systemAlertPhase === 'HOLDING') { systemAlertTimer++; if (systemAlertTimer >= SYSTEM_ALERT_HOLD_DURATION) { systemAlertPhase = 'FADING_OUT'; } }
@@ -198,15 +198,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!hasCollectedFirstCoin) { timedDialogue.text = gameTexts.firstCoinDialogue[currentLanguage]; timedDialogue.timer = TIMED_DIALOGUE_DURATION; hasCollectedFirstCoin = true;
                     } else if (goodCoinsCollected === 5 && hasTakenDamage && !hasTriggeredSystemSequence) { timedDialogue.text = gameTexts.fifthCoinConditionalDialogue[currentLanguage]; timedDialogue.timer = TIMED_DIALOGUE_DURATION;
                     } else if (goodCoinsCollected === 7 && !hasTriggered7CoinDialogue) { timedDialogue.text = gameTexts.sevenCoinsDialogue[currentLanguage]; timedDialogue.timer = TIMED_DIALOGUE_DURATION; hasTriggered7CoinDialogue = true; }
+                    
                     if (goodCoinsCollected === 5 && !hasTriggeredSystemSequence) {
                         hasTriggeredSystemSequence = true;
                         gameState = 'SYSTEM_ALERT_INTRO';
                         systemAlertPhase = 'FADING_IN'; systemAlertAlpha = 0; systemAlertTimer = 0;
-                        // --- NUEVO: Reiniciar el estado del texto para el efecto ---
                         systemAlertTextProgress = 0;
                         systemAlertGlitchedText = "";
                         textRevealCounter = 0;
-                        // --- FIN DE LA MODIFICACIÓN ---
+                    }
+
+                    // Lógica de transición a la siguiente etapa
+                    if (goodCoinsCollected === 9 && !isTransitioning) {
+                        isTransitioning = true; // Prevenir activación múltiple
+                        loadingDialogue.textContent = gameTexts.transitionDialogue[currentLanguage];
+                        loadingScreen.classList.remove('hidden');
+
+                        // Esperar 4 segundos antes de cambiar de página
+                        setTimeout(() => {
+                            window.location.href = 'game2.html';
+                        }, 4000);
                     }
                 }
             }
@@ -243,13 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
     }
 
-   
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (!assets.ground || !assets.player) {
             ctx.fillStyle = 'red'; ctx.font = '20px monospace'; ctx.textAlign = 'center'; ctx.fillText(gameTexts.errorTitle[currentLanguage], canvas.width / 2, canvas.height / 2); ctx.fillText(gameTexts.errorSubtitle[currentLanguage], canvas.width / 2, canvas.height / 2 + 30); return;
         }
-
         
         ctx.save();
         const scale = canvas.height / BASE_HEIGHT;
@@ -279,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         ctx.restore();
 
-     
         if (gameState === 'SPLASH_SCREEN') {
             ctx.fillStyle = `rgba(0, 0, 0, ${splashAlpha * 0.7})`; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.save(); ctx.globalAlpha = splashAlpha; ctx.textAlign = 'center'; ctx.font = '90px monospace'; ctx.fillStyle = 'white'; ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; ctx.shadowBlur = 10; ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 5; ctx.fillText('Acto 1', canvas.width / 2, canvas.height / 2); ctx.font = '45px monospace'; ctx.fillStyle = '#FFD700'; ctx.shadowColor = 'transparent'; ctx.fillText('Plataformas', canvas.width / 2, canvas.height / 2 + 60); ctx.restore();
         } else if (gameState === 'DIALOGUE') {
@@ -295,13 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState === 'SYSTEM_ALERT_INTRO') {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // --- MODIFICADO: Usar el texto glitcheado dinámico ---
             drawSystemAlert(systemAlertGlitchedText);
-            // --- FIN DE LA MODIFICACIÓN ---
         }
     }
 
     function gameLoop() {
+        if (isTransitioning) {
+            // Pausar el juego durante la transición
+            return;
+        }
         if (gameState === 'SYSTEM_ALERT_INTRO') { updateSystemAlert('HEAL_BUTTON_PROMPT');
         } else if (gameState === 'PLAYING') { updatePlaying();
         } else if (gameState === 'SPLASH_SCREEN') { updateSplashScreen();
