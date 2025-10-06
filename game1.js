@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeCanvas();
 
     // --- Asset Management ---
-    // ARREGLO: Se añade la ruta a la carpeta 'imagenes' a todos los assets.
     const ASSET_SOURCES = {
         player: 'imagenes/player_spritesheet.png',
         ground: 'imagenes/suelo.png',
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameLoop();
     }
 
-    // --- Sistema de Input (sin cambios) ---
+    // --- Sistema de Input ---
     const keys = { ArrowLeft: false, ArrowRight: false, Space: false };
     window.addEventListener('keydown', (e) => { if (e.code in keys) keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
     window.addEventListener('keyup', (e) => { if (e.code in keys) keys[e.code] = false; });
@@ -117,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnJump.addEventListener('mouseleave', () => handleButtonPress('Space', false));
     btnJump.addEventListener('touchstart', (e) => { e.preventDefault(); handleButtonPress('Space', true); });
     btnJump.addEventListener('touchend', (e) => { e.preventDefault(); handleButtonPress('Space', false); });
-
 
     // --- Lógica de Actualización (Update) ---
     function updateSplashScreen() {
@@ -183,11 +181,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // ARREGLO: Comprobar si los assets esenciales están cargados
+        if (!assets.ground || !assets.player) {
+            ctx.fillStyle = 'red';
+            ctx.font = '20px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('ERROR: No se pueden encontrar los archivos del jugador o del suelo.', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('Asegúrate de que están en la carpeta /imagenes/', canvas.width / 2, canvas.height / 2 + 30);
+            return; // Detener el dibujado si faltan archivos
+        }
+        
         ctx.save();
         const scale = canvas.height / BASE_HEIGHT;
         const offsetX = (canvas.width - BASE_WIDTH * scale) / 2;
         ctx.translate(offsetX, 0); ctx.scale(scale, scale);
         ctx.translate(-camera.x, -camera.y);
+        
         const groundPattern = ctx.createPattern(assets.ground, 'repeat');
         ctx.fillStyle = groundPattern;
         for (const platform of platforms) {
@@ -223,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.save();
             ctx.globalAlpha = splashAlpha;
             ctx.textAlign = 'center';
-
             ctx.font = '90px monospace';
             ctx.fillStyle = 'white';
             ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
@@ -231,12 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.shadowOffsetX = 5;
             ctx.shadowOffsetY = 5;
             ctx.fillText('Acto 1', canvas.width / 2, canvas.height / 2);
-
             ctx.font = '45px monospace';
             ctx.fillStyle = '#FFD700';
             ctx.shadowColor = 'transparent';
             ctx.fillText('Plataformas', canvas.width / 2, canvas.height / 2 + 60);
-            
             ctx.restore();
         } 
         else if (gameState === 'PLAYING') {
