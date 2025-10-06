@@ -11,37 +11,27 @@
 </head>
 <body>
 
-    <div id="game-container">
+    <!-- ===== NUEVO: Overlay de Introducción para la Etapa 2 ===== -->
+    <div id="lore-intro-overlay">
+        <div class="lore-content">
+            <p id="lore-text"></p>
+            <p id="continue-prompt"></p>
+        </div>
+    </div>
+
+    <!-- El contenedor del juego ahora está oculto por defecto -->
+    <div id="game-container" class="hidden">
         <header>
-            <h1 class="glitch-title">Acto 2: La Futilidad</h1>
+            <h1 class="glitch-title">Acto 2: El Eco</h1>
             <div id="dialogue-box">
                 <p id="dialogue-text"></p>
             </div>
         </header>
-
+        
+        <!-- Aquí irá la nueva interfaz del juego más adelante -->
         <main>
-            <div id="stats-container">
-                <div class="stat">
-                    <h2>Glitches Acumulados</h2>
-                    <p id="glitches-display">0</p>
-                </div>
-                <div class="stat">
-                    <h2>Glitches / segundo</h2>
-                    <p id="gps-display">0</p>
-                </div>
-            </div>
-
-            <div id="clicker-container">
-                <button id="main-clicker-btn">Generar Glitch</button>
-            </div>
+            <p style="text-align: center; font-size: 1.5rem;">[PRÓXIMAMENTE: Nueva jugabilidad]</p>
         </main>
-
-        <aside id="upgrades-container">
-            <h2>Mejoras del Sistema</h2>
-            <div id="upgrades-list">
-                <!-- Las mejoras se generarán aquí -->
-            </div>
-        </aside>
     </div>
 
     <script src="game2.js"></script>
