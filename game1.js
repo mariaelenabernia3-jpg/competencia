@@ -2,6 +2,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('platformerCanvas');
     const ctx = canvas.getContext('2d');
 
+    // --- NUEVO: Gestión de Idioma y Textos ---
+    const currentLanguage = localStorage.getItem('eg_language') || 'es'; // Lee el idioma guardado o usa 'es' por defecto
+
+    const gameTexts = {
+        dialogue: {
+            es: ["¿Dónde estoy?", "¿Qué es esto, plataformas?", "¿En dónde estoy?"],
+            en: ["Where am I?", "What is this, platforms?", "Where am I?"]
+        },
+        missionTitle: { es: "Misión 1", en: "Mission 1" },
+        missionObjective: { es: "Recoge todas las monedas", en: "Collect all the coins" },
+        score: { es: "Puntos", en: "Score" },
+        health: { es: "Vida", en: "Health" },
+        errorTitle: { es: "ERROR: No se pueden encontrar los archivos del jugador o del suelo.", en: "ERROR: Cannot find player or ground assets." },
+        errorSubtitle: { es: "Asegúrate de que están en la carpeta /imagenes/", en: "Make sure they are in the /imagenes/ folder." },
+        continuePrompt: { es: "Click o Espacio para continuar...", en: "Click or Space to continue..." }
+    };
+
     const BASE_WIDTH = 800;
     const BASE_HEIGHT = 600;
 
@@ -16,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ASSET_SOURCES = {
         player: 'imagenes/player_spritesheet.png',
         ground: 'imagenes/suelo.png',
-        decor1: 'imagenes/1.png', decor2: 'imagenes/2.png', 
-        decor3: 'imagenes/3.png', decor4: 'imagenes/4.png', 
-        decor5: 'imagenes/5.png', decor6: 'imagenes/6.png', 
+        decor1: 'imagenes/1.png', decor2: 'imagenes/2.png',
+        decor3: 'imagenes/3.png', decor4: 'imagenes/4.png',
+        decor5: 'imagenes/5.png', decor6: 'imagenes/6.png',
         coin: 'imagenes/Gold_21.png'
     };
     const assets = {};
@@ -30,16 +47,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let splashHoldTimer = 0;
     const SPLASH_HOLD_DURATION = 120;
 
+    // --- Constantes y variables para el diálogo y la misión ---
+    let currentDialogueIndex = 0;
+    let missionAlpha = 0;
+    let missionPhase = 'FADING_IN';
+    let missionHoldTimer = 0;
+    const MISSION_HOLD_DURATION = 180;
+    let inputCooldown = 0;
+    const INPUT_COOLDOWN_FRAMES = 15;
+
     // --- Constantes del Juego ---
     const GRAVITY = 0.5;
     const MOVE_SPEED = 5;
     const JUMP_FORCE = 15;
-    const PLAYER_VISUAL_OFFSET_Y = 5; 
+    const PLAYER_VISUAL_OFFSET_Y = 5;
     const DECORATION_SIZE = 50;
     const COIN_SIZE = 35;
 
     // --- Constantes de Animación ---
-    const FRAME_WIDTH = 33; const FRAME_HEIGHT = 42; const FRAME_SPEED = 4;        
+    const FRAME_WIDTH = 33; const FRAME_HEIGHT = 42; const FRAME_SPEED = 4;
     const IDLE_FRAME = 0; const JUMP_FRAME = 1; const WALK_CYCLE_START_FRAME = 2; const TOTAL_WALK_FRAMES = 4;
 
     // --- Game Objects ---
@@ -61,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             img.src = ASSET_SOURCES[key];
         }
     }
-    
+
     // --- Función para inicializar el juego ---
     function initializeGame() {
         score = 0; health = 100;
@@ -85,18 +111,20 @@ document.addEventListener('DOMContentLoaded', () => {
         coins = [
             { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false },
             { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false },
-            { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, 
-            { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, 
+            { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false },
+            { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false },
             { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false },
         ];
-        
         gameLoop();
     }
 
     // --- Sistema de Input ---
     const keys = { ArrowLeft: false, ArrowRight: false, Space: false };
+    let isClicking = false;
     window.addEventListener('keydown', (e) => { if (e.code in keys) keys[e.code] = true; if (e.code === 'Space') e.preventDefault(); });
     window.addEventListener('keyup', (e) => { if (e.code in keys) keys[e.code] = false; });
+    canvas.addEventListener('mousedown', () => isClicking = true);
+    canvas.addEventListener('mouseup', () => isClicking = false);
     const btnLeft = document.getElementById('btn-left');
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
@@ -128,7 +156,36 @@ document.addEventListener('DOMContentLoaded', () => {
             if (splashHoldTimer >= SPLASH_HOLD_DURATION) { splashPhase = 'FADING_OUT'; }
         } else if (splashPhase === 'FADING_OUT') {
             splashAlpha -= FADE_SPEED;
-            if (splashAlpha <= 0) { splashAlpha = 0; gameState = 'PLAYING'; }
+            if (splashAlpha <= 0) { splashAlpha = 0; gameState = 'DIALOGUE'; }
+        }
+    }
+
+    function updateDialogue() {
+        if (inputCooldown > 0) { inputCooldown--; return; }
+
+        if (keys.Space || isClicking) {
+            currentDialogueIndex++;
+            inputCooldown = INPUT_COOLDOWN_FRAMES;
+            isClicking = false;
+
+            // MODIFICADO: Comprueba la longitud del array de diálogos del idioma actual
+            if (currentDialogueIndex >= gameTexts.dialogue[currentLanguage].length) {
+                gameState = 'MISSION';
+            }
+        }
+    }
+
+    function updateMission() {
+        const FADE_SPEED = 0.025;
+        if (missionPhase === 'FADING_IN') {
+            missionAlpha += FADE_SPEED;
+            if (missionAlpha >= 1) { missionAlpha = 1; missionPhase = 'HOLDING'; }
+        } else if (missionPhase === 'HOLDING') {
+            missionHoldTimer++;
+            if (missionHoldTimer >= MISSION_HOLD_DURATION) { missionPhase = 'FADING_OUT'; }
+        } else if (missionPhase === 'FADING_OUT') {
+            missionAlpha -= FADE_SPEED;
+            if (missionAlpha <= 0) { missionAlpha = 0; gameState = 'PLAYING'; }
         }
     }
 
@@ -165,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player.frameTimer++;
         if (player.frameTimer > FRAME_SPEED) {
             player.frameTimer = 0;
-            if (player.isJumping) { player.currentFrame = JUMP_FRAME; } 
+            if (player.isJumping) { player.currentFrame = JUMP_FRAME; }
             else if (isMoving) {
                 let currentWalkFrame = player.currentFrame - WALK_CYCLE_START_FRAME;
                 if (currentWalkFrame < 0 || currentWalkFrame >= TOTAL_WALK_FRAMES) { currentWalkFrame = 0; }
@@ -180,23 +237,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Renderizado del Juego ---
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // ARREGLO: Comprobar si los assets esenciales están cargados
+
+        // MODIFICADO: Usa los textos del idioma actual para los errores
         if (!assets.ground || !assets.player) {
             ctx.fillStyle = 'red';
             ctx.font = '20px monospace';
             ctx.textAlign = 'center';
-            ctx.fillText('ERROR: No se pueden encontrar los archivos del jugador o del suelo.', canvas.width / 2, canvas.height / 2);
-            ctx.fillText('Asegúrate de que están en la carpeta /imagenes/', canvas.width / 2, canvas.height / 2 + 30);
-            return; // Detener el dibujado si faltan archivos
+            ctx.fillText(gameTexts.errorTitle[currentLanguage], canvas.width / 2, canvas.height / 2);
+            ctx.fillText(gameTexts.errorSubtitle[currentLanguage], canvas.width / 2, canvas.height / 2 + 30);
+            return;
         }
-        
+
         ctx.save();
         const scale = canvas.height / BASE_HEIGHT;
         const offsetX = (canvas.width - BASE_WIDTH * scale) / 2;
         ctx.translate(offsetX, 0); ctx.scale(scale, scale);
         ctx.translate(-camera.x, -camera.y);
-        
+
         const groundPattern = ctx.createPattern(assets.ground, 'repeat');
         ctx.fillStyle = groundPattern;
         for (const platform of platforms) {
@@ -228,27 +285,55 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameState === 'SPLASH_SCREEN') {
             ctx.fillStyle = `rgba(0, 0, 0, ${splashAlpha * 0.7})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             ctx.save();
             ctx.globalAlpha = splashAlpha;
             ctx.textAlign = 'center';
             ctx.font = '90px monospace';
             ctx.fillStyle = 'white';
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 5;
-            ctx.shadowOffsetY = 5;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 5; ctx.shadowOffsetY = 5;
             ctx.fillText('Acto 1', canvas.width / 2, canvas.height / 2);
             ctx.font = '45px monospace';
             ctx.fillStyle = '#FFD700';
             ctx.shadowColor = 'transparent';
             ctx.fillText('Plataformas', canvas.width / 2, canvas.height / 2 + 60);
             ctx.restore();
-        } 
+        }
+        else if (gameState === 'DIALOGUE') {
+            const boxHeight = 150;
+            const boxY = canvas.height - boxHeight - 20;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(10, boxY, canvas.width - 20, boxHeight);
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(10, boxY, canvas.width - 20, boxHeight);
+            
+            ctx.fillStyle = '#fff'; ctx.font = '30px monospace'; ctx.textAlign = 'left';
+            // MODIFICADO: Muestra la línea de diálogo del idioma actual
+            ctx.fillText(gameTexts.dialogue[currentLanguage][currentDialogueIndex], 30, boxY + 50);
+
+            ctx.fillStyle = '#aaa'; ctx.font = '20px monospace'; ctx.textAlign = 'right';
+            // MODIFICADO: Muestra el prompt de continuar del idioma actual
+            ctx.fillText(gameTexts.continuePrompt[currentLanguage], canvas.width - 30, boxY + boxHeight - 20);
+        }
+        else if (gameState === 'MISSION') {
+             ctx.save();
+            ctx.globalAlpha = missionAlpha;
+            ctx.textAlign = 'center';
+            ctx.font = '50px monospace'; ctx.fillStyle = 'white';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; ctx.shadowBlur = 10;
+            // MODIFICADO: Muestra el título de la misión del idioma actual
+            ctx.fillText(gameTexts.missionTitle[currentLanguage], canvas.width / 2, canvas.height / 2 - 30);
+            ctx.font = '35px monospace'; ctx.fillStyle = '#FFD700';
+            // MODIFICADO: Muestra el objetivo de la misión del idioma actual
+            ctx.fillText(gameTexts.missionObjective[currentLanguage], canvas.width / 2, canvas.height / 2 + 30);
+            ctx.restore();
+        }
         else if (gameState === 'PLAYING') {
             ctx.fillStyle = 'white'; ctx.font = '40px monospace'; ctx.textAlign = 'left';
-            ctx.fillText(`Puntos: ${score}`, 20, 50);
-            ctx.fillText(`Vida: ${health}`, 20, 90);
+            // MODIFICADO: Muestra el HUD del idioma actual
+            ctx.fillText(`${gameTexts.score[currentLanguage]}: ${score}`, 20, 50);
+            ctx.fillText(`${gameTexts.health[currentLanguage]}: ${health}`, 20, 90);
         }
     }
 
@@ -256,7 +341,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function gameLoop() {
         if (gameState === 'SPLASH_SCREEN') {
             updateSplashScreen();
-        } else {
+        } else if (gameState === 'DIALOGUE') {
+            updateDialogue();
+        } else if (gameState === 'MISSION') {
+            updateMission();
+        } else if (gameState === 'PLAYING') {
             updatePlaying();
         }
         draw();
