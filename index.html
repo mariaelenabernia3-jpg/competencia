@@ -11,7 +11,7 @@
 </head>
 <body class="theme-8bit">
 
-    <!-- NUEVO: OVERLAY DE BLOQUEO PARA MÓVILES -->
+    <!-- OVERLAY DE BLOQUEO PARA MÓVILES -->
     <div id="enforce-view-overlay">
         <div class="enforce-view-content">
             <h2>Acción Requerida</h2>
@@ -21,9 +21,10 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE ROTACIÓN PARA MÓVILES (AHORA SECUNDARIA) -->
+    <!-- PANTALLA DE ROTACIÓN PARA MÓVILES -->
     <div id="rotate-screen">
-        <img src="rotate.png" alt="Rotate Device">
+        <!-- ARREGLO: Ruta actualizada a la carpeta de imágenes -->
+        <img src="imagenes/rotate.png" alt="Rotate Device">
         <p>Por favor, pon tu teléfono en horizontal o usa una computadora.</p>
     </div>
 
@@ -118,8 +119,9 @@
     <div id="version-info">versión 0.1alpha</div>
 
     <!-- Elementos de audio -->
-    <audio id="glitch-sound" src="glitch_01-226601.mp3" preload="auto"></audio>
-    <audio id="background-music" src="meditation-music-sound-bite-339735.mp3" loop preload="auto"></audio>
+    <!-- ARREGLO: Rutas actualizadas a la carpeta de audio -->
+    <audio id="glitch-sound" src="audio/glitch_01-226601.mp3" preload="auto"></audio>
+    <audio id="background-music" src="audio/meditation-music-sound-bite-339735.mp3" loop preload="auto"></audio>
 
     <script src="script.js"></script>
 
@@ -130,20 +132,15 @@
             const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
 
             function checkMobileView() {
-                if (!isMobile) return; // Si no es móvil, no hace nada
-
-                // Condiciones: estar en horizontal Y tener un ancho de viewport grande (simulando "sitio de escritorio")
+                if (!isMobile) return;
                 const isLandscape = window.innerWidth > window.innerHeight;
-                const isDesktopMode = window.innerWidth >= 980; // Un valor común para el modo escritorio en móviles
-
+                const isDesktopMode = window.innerWidth >= 980;
                 if (isLandscape && isDesktopMode) {
                     overlay.classList.remove('visible');
                 } else {
                     overlay.classList.add('visible');
                 }
             }
-
-            // Verificar al cargar y cada vez que la ventana cambie de tamaño
             checkMobileView();
             window.addEventListener('resize', checkMobileView);
         });
