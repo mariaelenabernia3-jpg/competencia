@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="game2.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- ===== NUEVO: Overlay de Introducción para la Etapa 2 ===== -->
+    <!-- Overlay para el diálogo inicial de "???" -->
     <div id="lore-intro-overlay">
         <div class="lore-content">
             <p id="lore-text"></p>
@@ -19,19 +19,71 @@
         </div>
     </div>
 
-    <!-- El contenedor del juego ahora está oculto por defecto -->
+    <!-- Overlay para la pantalla de título "Acto 2" -->
+    <div id="title-screen-overlay" class="hidden">
+        <h1>Acto 2</h1>
+        <h2>El Mundo Idle</h2>
+    </div>
+
+    <!-- Contenedor principal del juego -->
     <div id="game-container" class="hidden">
-        <header>
-            <h1 class="glitch-title">Acto 2: El Eco</h1>
-            <div id="dialogue-box">
-                <p id="dialogue-text"></p>
+
+        <!-- Personaje y su burbuja de diálogo -->
+        <div id="character-container" class="hidden">
+            <img src="imagenes/niño.png" alt="Personaje">
+            <div id="character-dialogue" class="hidden">
+                <p></p>
             </div>
-        </header>
+        </div>
         
-        <!-- Aquí irá la nueva interfaz del juego más adelante -->
-        <main>
-            <p style="text-align: center; font-size: 1.5rem;">[PRÓXIMAMENTE: Nueva jugabilidad]</p>
-        </main>
+        <!-- Interfaz principal del juego -->
+        <div id="main-interface" class="hidden">
+            <div id="left-panel">
+                <div id="stats-panel" class="panel">
+                    <h3>Estado</h3>
+                    <div class="stat-item">
+                        <span>⚡ Energía:</span>
+                        <span id="energy-display">50 / 100</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>💻 PC Nivel:</span>
+                        <span id="pc-level-display">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>💰 Bits:</span>
+                        <span id="bits-display">0</span>
+                    </div>
+                </div>
+                <div id="actions-panel" class="panel">
+                    <h3>Acciones</h3>
+                    <button id="create-game-btn">Crear Juego</button>
+                    <button id="eat-btn">Comer (5 Bits)</button>
+                    <button id="shop-btn">Tienda</button>
+                </div>
+            </div>
+            <div id="right-panel">
+                <div id="minigame-panel" class="panel hidden">
+                    <h4>Creando Juego...</h4>
+                    <p>¡Toca rápido para terminar!</p>
+                    <div id="progress-bar">
+                        <div id="progress-bar-fill"></div>
+                    </div>
+                    <button id="tap-btn">Tocar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Overlay para la Tienda -->
+    <div id="shop-overlay" class="hidden">
+        <div class="shop-content panel">
+            <h2>Tienda</h2>
+            <div id="shop-items">
+                <!-- Los artículos de la tienda se insertarán aquí -->
+            </div>
+            <button id="close-shop-btn">Cerrar</button>
+        </div>
     </div>
 
     <script src="game2.js"></script>
