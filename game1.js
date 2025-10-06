@@ -13,9 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeCanvas();
 
     // --- Asset Management ---
+    // ARREGLO: Se añade la ruta a la carpeta 'imagenes' a todos los assets.
     const ASSET_SOURCES = {
-        player: 'player_spritesheet.png', ground: 'suelo.png', decor1: '1.png', decor2: '2.png', 
-        decor3: '3.png', decor4: '4.png', decor5: '5.png', decor6: '6.png', coin: 'Gold_21.png'
+        player: 'imagenes/player_spritesheet.png',
+        ground: 'imagenes/suelo.png',
+        decor1: 'imagenes/1.png', decor2: 'imagenes/2.png', 
+        decor3: 'imagenes/3.png', decor4: 'imagenes/4.png', 
+        decor5: 'imagenes/5.png', decor6: 'imagenes/6.png', 
+        coin: 'imagenes/Gold_21.png'
     };
     const assets = {};
 
@@ -79,16 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
             { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' },
         ];
         coins = [
-            { x: 250, y: 400, isVisible: true, isBad: false }, 
-            { x: 285, y: 400, isVisible: true, isBad: false }, // <-- ARREGLO: Faltaba una coma aquí
-            { x: 500, y: 300, isVisible: true, isBad: false }, 
-            { x: 535, y: 300, isVisible: true, isBad: false },
-            { x: 800, y: 400, isVisible: true, isBad: true }, 
-            { x: 1050, y: 350, isVisible: true, isBad: false }, 
-            { x: 1250, y: 250, isVisible: true, isBad: false }, 
-            { x: 1405, y: 150, isVisible: true, isBad: false }, 
-            { x: 1700, y: 300, isVisible: true, isBad: false }, 
-            { x: 1735, y: 300, isVisible: true, isBad: false },
+            { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false },
+            { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false },
+            { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, 
+            { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, 
+            { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false },
         ];
         
         gameLoop();
