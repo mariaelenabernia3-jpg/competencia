@@ -1,83 +1,91 @@
+:root {
+    --primary-color: #00ff00;
+    --background-color: #0d0d0d;
+    --panel-bg: rgba(0, 20, 0, 0.6);
+    --border-color: #005000;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: 'VT323', monospace;
-    background-color: #0d0d0d;
-    color: #00ff00;
-    overflow: hidden; /* Evita barras de scroll */
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    overflow: hidden;
 }
 
-/* ===== NUEVO: Estilos para el Overlay de Introducción ===== */
-#lore-intro-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    cursor: pointer;
-    padding: 20px;
-    box-sizing: border-box;
+.hidden { display: none !important; }
+
+/* --- Overlays de Introducción --- */
+#lore-intro-overlay, #title-screen-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #000; z-index: 1000; display: flex;
+    justify-content: center; align-items: center; text-align: center;
+    flex-direction: column; padding: 20px; box-sizing: border-box;
+}
+#lore-intro-overlay { cursor: pointer; }
+#lore-text { font-size: 2.5rem; color: #fff; text-shadow: 0 0 8px #fff; }
+#continue-prompt { font-size: 1.2rem; color: #888; margin-top: 50px; animation: pulse 2s infinite; }
+#title-screen-overlay h1 { font-family: 'Press Start 2P', cursive; font-size: 5rem; margin: 0; animation: fadeIn 2s ease-in; }
+#title-screen-overlay h2 { font-size: 2rem; margin-top: 10px; color: #aaa; animation: fadeIn 2s ease-in 0.5s; animation-fill-mode: backwards; }
+
+/* --- Contenedor Principal y Personaje --- */
+#game-container { position: relative; width: 100vw; height: 100vh; }
+
+#character-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    width: 200px; /* Ajusta el tamaño según tu imagen */
+    transition: all 1.5s ease-in-out;
+    z-index: 500;
+}
+#character-container img { max-width: 100%; animation: fadeIn 1s; }
+#character-dialogue {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    background: var(--panel-bg); border: 1px solid var(--primary-color);
+    padding: 10px 15px; border-radius: 10px; width: 250px;
+    margin-bottom: 15px; text-align: center; font-size: 1.1rem;
+}
+/* Estado del personaje en la esquina */
+#character-container.in-corner {
+    top: 100%; left: 0;
+    transform: translate(10px, -110%) scale(0.6); /* Ajusta la escala y posición final */
 }
 
-.lore-content {
-    max-width: 800px;
-}
+/* --- Interfaz Principal --- */
+#main-interface { display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 20px; height: 100vh; animation: fadeIn 1s; }
+.panel { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 15px; box-shadow: 0 0 10px rgba(0, 255, 0, 0.2); }
+#left-panel, #right-panel { display: flex; flex-direction: column; gap: 20px; width: 300px; }
+#stats-panel h3, #actions-panel h3 { margin: 0 0 15px 0; text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+.stat-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.2rem; }
+#actions-panel button { width: 100%; }
 
-#lore-text {
-    font-size: 2.5rem;
-    color: #fff;
-    text-shadow: 0 0 8px #fff;
-}
+/* --- Minijuego --- */
+#minigame-panel { text-align: center; }
+#progress-bar { width: 100%; background-color: #002b00; border: 1px solid var(--border-color); margin: 15px 0; }
+#progress-bar-fill { height: 25px; width: 0%; background-color: var(--primary-color); transition: width 0.1s linear; }
 
-#continue-prompt {
-    font-size: 1.2rem;
-    color: #888;
-    margin-top: 50px;
-    animation: pulse 2s infinite;
+/* --- Tienda --- */
+#shop-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center; z-index: 2000;
 }
+.shop-content { width: 90%; max-width: 500px; }
+.shop-content h2 { text-align: center; margin-top: 0; }
+#shop-items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.shop-item { display: flex; justify-content: space-between; align-items: center; }
 
-@keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+/* --- Elementos Comunes (Botones, etc.) --- */
+button {
+    font-family: 'VT323', monospace; font-size: 1.2rem; padding: 10px;
+    cursor: pointer; background: transparent; border: 1px solid var(--primary-color);
+    color: var(--primary-color); margin-top: 5px;
 }
-/* ===== FIN DE NUEVOS ESTILOS ===== */
+button:hover:not(:disabled) { background: rgba(0, 255, 0, 0.1); }
+button:disabled { color: #555; border-color: #333; cursor: not-allowed; }
 
-.hidden {
-    display: none !important;
-}
-
-#game-container {
-    width: 100%;
-    max-width: 900px;
-    border: 2px solid #00ff00;
-    box-shadow: 0 0 15px #00ff00;
-    padding: 20px;
-    background-color: rgba(0, 15, 0, 0.5);
-    margin: 20px;
-}
-
-header {
-    text-align: center;
-    border-bottom: 1px solid #00ff00;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-
-.glitch-title {
-    font-size: 2.5rem;
-    text-shadow: 0 0 5px #0f0;
-}
-
-#dialogue-box {
-    background-color: #000;
-    border: 1px solid #00ff00;
-    padding: 10px;
-    margin-top: 15px;
-    min-height: 40px;
-}
+/* --- Animaciones --- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
