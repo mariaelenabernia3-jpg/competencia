@@ -3,10 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const healOverlay = document.getElementById('heal-overlay');
     const healButton = document.getElementById('heal-button');
-    
-    // Selector para la pantalla de carga de transición
     const loadingScreen = document.getElementById('loading-screen');
     const loadingDialogue = document.getElementById('loading-dialogue');
+    
+    // --- NUEVO: Selector y configuración del sonido de glitch ---
+    const glitchSound = document.getElementById('glitch-sound');
+    const sfxVolume = localStorage.getItem('eg_sfxVolume') || 1.0;
+    if (glitchSound) {
+        glitchSound.volume = sfxVolume;
+    }
+    // --- FIN ---
 
     const currentLanguage = localStorage.getItem('eg_language') || 'es';
 
@@ -40,11 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let gameState = 'SPLASH_SCREEN';
     let splashAlpha = 0, splashPhase = 'FADING_IN', splashHoldTimer = 0; const SPLASH_HOLD_DURATION = 120;
-    let currentDialogueIndex = 0; let dialogueLineTimer = 0; const DIALOGUE_LINE_DURATION = 180;
+    let currentDialogueIndex = 0, dialogueLineTimer = 0; const DIALOGUE_LINE_DURATION = 180;
     let missionAlpha = 0, missionPhase = 'FADING_IN', missionHoldTimer = 0; const MISSION_HOLD_DURATION = 180;
     let systemAlertAlpha = 0, systemAlertPhase = 'FADING_IN', systemAlertTimer = 0; const SYSTEM_ALERT_HOLD_DURATION = 300;
     
-    // Variables para el efecto de texto glitch
     let systemAlertTextProgress = 0;
     let systemAlertGlitchedText = "";
     const GLITCH_CHAR_SET = '█▓▒░abcdefghijklmnopqrstuvwxyz0123456789!?@#$%&/\\';
@@ -55,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let goodCoinsCollected = 0;
     let hasJumpedOnce = false, hasCollectedFirstCoin = false, hasTriggered7CoinDialogue = false;
     let hasTakenDamage = false, hasTriggeredSystemSequence = false;
-    let isTransitioning = false; // Bandera para la transición final
+    let isTransitioning = false;
 
     const TIMED_DIALOGUE_DURATION = 300;
     const GRAVITY = 0.5, MOVE_SPEED = 5, JUMP_FORCE = 15;
@@ -87,7 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isTransitioning = false;
         if (assets.ground) { groundPattern = ctx.createPattern(assets.ground, 'repeat'); }
         platforms = [ { x: -1000, y: 590, width: 10000, height: 50 }, { x: 200, y: 450, width: 150, height: 20 }, { x: 450, y: 350, width: 150, height: 20 }, { x: 700, y: 450, width: 200, height: 20 }, { x: 1000, y: 400, width: 150, height: 20 }, { x: 1200, y: 300, width: 150, height: 20 }, { x: 1400, y: 200, width: 50, height: 20 }, { x: 1600, y: 350, width: 250, height: 20 }, { x: 1950, y: 280, width: 150, height: 20 } ];
-        decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DEcoration_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
+        
+        // ===== CORRECCIÓN DEL ERROR DE TIPEO =====
+        decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DECORATION_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
+        
         coins = [ { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false }, { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false }, { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false }, ];
         gameLoop();
     }
@@ -201,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (goodCoinsCollected === 5 && !hasTriggeredSystemSequence) {
                         hasTriggeredSystemSequence = true;
+                        if (glitchSound) glitchSound.play(); // --- NUEVO: Reproducir sonido ---
                         gameState = 'SYSTEM_ALERT_INTRO';
                         systemAlertPhase = 'FADING_IN'; systemAlertAlpha = 0; systemAlertTimer = 0;
                         systemAlertTextProgress = 0;
@@ -208,13 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         textRevealCounter = 0;
                     }
 
-                    // Lógica de transición a la siguiente etapa
                     if (goodCoinsCollected === 9 && !isTransitioning) {
-                        isTransitioning = true; // Prevenir activación múltiple
+                        isTransitioning = true;
                         loadingDialogue.textContent = gameTexts.transitionDialogue[currentLanguage];
                         loadingScreen.classList.remove('hidden');
-
-                        // Esperar 4 segundos antes de cambiar de página
                         setTimeout(() => {
                             window.location.href = 'game2.html';
                         }, 4000);
@@ -309,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function gameLoop() {
         if (isTransitioning) {
-            // Pausar el juego durante la transición
             return;
         }
         if (gameState === 'SYSTEM_ALERT_INTRO') { updateSystemAlert('HEAL_BUTTON_PROMPT');
