@@ -93,7 +93,7 @@ button:disabled { color: #555; border-color: #333; cursor: not-allowed; }
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ===== NUEVO: ESTILOS PARA ADAPTACIÓN MÓVIL ===== */
+/* ===== ESTILOS PARA ADAPTACIÓN MÓVIL ===== */
 @media (max-width: 768px) {
     #main-interface {
         flex-direction: column; /* Apila los paneles verticalmente */
@@ -117,4 +117,4 @@ button:disabled { color: #555; border-color: #333; cursor: not-allowed; }
         text-align: center;
         gap: 5px;
     }
-}
+        }
