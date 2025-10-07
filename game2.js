@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- BILINGUAL TEXTS ---
+   
     const game2Texts = {
         introLore: { es: "???: Despierta, pequeño.", en: "???: Wake up, little one." },
         continuePrompt: { es: "[Toca para continuar]", en: "[Tap to continue]" },
