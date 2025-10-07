@@ -3,6 +3,8 @@
     --background-color: #0d0d0d;
     --panel-bg: rgba(0, 20, 0, 0.6);
     --border-color: #005000;
+    --glitch-color: #ff00ff;
+    --hacker-color: #ff4757;
 }
 
 body {
@@ -76,7 +78,7 @@ body {
 }
 .shop-content { width: 90%; max-width: 500px; }
 .shop-content h2 { text-align: center; margin-top: 0; }
-#shop-items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+#shop-items { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; max-height: 60vh; overflow-y: auto; }
 .shop-item { display: flex; justify-content: space-between; align-items: center; padding: 5px; }
 
 /* --- Elementos Comunes (Botones, etc.) --- */
@@ -84,31 +86,108 @@ button {
     font-family: 'VT323', monospace; font-size: 1.2rem; padding: 10px;
     cursor: pointer; background: transparent; border: 1px solid var(--primary-color);
     color: var(--primary-color); margin-top: 5px;
+    touch-action: manipulation;
 }
 button:hover:not(:disabled) { background: rgba(0, 255, 0, 0.1); }
 button:disabled { color: #555; border-color: #333; cursor: not-allowed; }
+
+/* --- Estilos para el botón de Glitch --- */
+.glitch-button {
+    border-color: var(--glitch-color);
+    color: var(--glitch-color);
+    text-shadow: 0 0 8px var(--glitch-color);
+}
+.glitch-button:hover:not(:disabled) {
+    background: rgba(255, 0, 255, 0.1);
+    animation: button-glitch 0.3s infinite;
+}
+.glitch-button:disabled {
+    border-color: #4d004d;
+    color: #4d004d;
+    text-shadow: none;
+}
+@keyframes button-glitch { 0%{transform:translate(0)} 25%{transform:translate(2px, -2px)} 50%{transform:translate(-2px, 2px)} 75%{transform:translate(2px, 2px)} 100%{transform:translate(-2px, -2px)} }
+
+/* --- Estilos para el minijuego del Hacker --- */
+#hacker-minigame-panel .stat-label {
+    text-align: left;
+    margin: 10px 0 2px 0;
+    font-size: 1rem;
+}
+.fight-progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #333;
+    border: 1px solid var(--border-color);
+    margin-bottom: 10px;
+}
+#player-progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.1s linear;
+}
+#hacker-progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--hacker-color);
+    transition: width 0.1s linear;
+}
+#hacker-result-text {
+    margin-top: 15px;
+    font-size: 1.3rem;
+    min-height: 20px;
+}
+
+/* --- Estilos para el overlay de Glitch --- */
+#glitch-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 9999;
+    background-color: #000;
+    animation: screen-glitch 2.5s linear forwards;
+    overflow: hidden;
+}
+#glitch-overlay::before, #glitch-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: inherit;
+    background-color: transparent;
+    mix-blend-mode: screen;
+}
+#glitch-overlay::before { background: rgba(255, 0, 0, 0.5); animation: glitch-anim-1 2.5s linear forwards; }
+#glitch-overlay::after { background: rgba(0, 255, 255, 0.5); animation: glitch-anim-2 2.5s linear forwards; }
 
 /* --- Animaciones --- */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ===== ESTILOS PARA ADAPTACIÓN MÓVIL ===== */
+/* --- Animaciones de Glitch --- */
+@keyframes screen-glitch { 0%{transform:skewX(0deg)} 20%{transform:skewX(25deg)} 40%{transform:skewX(-25deg)} 60%{transform:skewX(20deg)} 80%{transform:skewX(-10deg)} 100%{transform:skewX(0deg); opacity: 0;} }
+@keyframes glitch-anim-1 { 0%{clip-path:inset(10% 0 80% 0)} 10%{clip-path:inset(50% 0 25% 0)} 20%{clip-path:inset(85% 0 5% 0)} 30%{clip-path:inset(30% 0 60% 0)} 40%{clip-path:inset(5% 0 90% 0)} 50%{clip-path:inset(70% 0 15% 0)} 60%{clip-path:inset(40% 0 40% 0)} 70%{clip-path:inset(90% 0 2% 0)} 80%{clip-path:inset(15% 0 70% 0)} 90%{clip-path:inset(60% 0 30% 0)} 100%{clip-path:inset(0% 0 100% 0)} }
+@keyframes glitch-anim-2 { 0%{clip-path:inset(80% 0 10% 0)} 10%{clip-path:inset(25% 0 50% 0)} 20%{clip-path:inset(5% 0 85% 0)} 30%{clip-path:inset(60% 0 30% 0)} 40%{clip-path:inset(90% 0 5% 0)} 50%{clip-path:inset(15% 0 70% 0)} 60%{clip-path:inset(50% 0 25% 0)} 70%{clip-path:inset(2% 0 90% 0)} 80%{clip-path:inset(70% 0 15% 0)} 90%{clip-path:inset(30% 0 60% 0)} 100%{clip-path:inset(100% 0 0% 0)} }
+
+
+/* --- ESTILOS PARA ADAPTACIÓN MÓVIL --- */
 @media (max-width: 768px) {
     #main-interface {
-        flex-direction: column; /* Apila los paneles verticalmente */
-        align-items: center; /* Centra los paneles apilados */
-        overflow-y: auto; /* Permite scroll si el contenido es muy largo */
-        padding-bottom: 150px; /* Espacio para que el personaje no tape nada */
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+        padding-bottom: 150px;
     }
 
     #left-panel, #right-panel {
-        width: 90%; /* Ocupa casi todo el ancho */
-        max-width: 400px; /* Límite para tabletas verticales */
+        width: 90%;
+        max-width: 400px;
     }
 
     #character-container.in-corner {
-        transform: translate(5px, -105%) scale(0.7); /* Ligeramente más grande y reposicionado */
+        transform: translate(5px, -105%) scale(0.7);
     }
 
     .shop-item {
@@ -117,4 +196,4 @@ button:disabled { color: #555; border-color: #333; cursor: not-allowed; }
         text-align: center;
         gap: 5px;
     }
-        }
+}

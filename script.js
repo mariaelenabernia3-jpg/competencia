@@ -48,15 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const glitchSound = document.getElementById('glitch-sound');
     const backgroundMusic = document.getElementById('background-music');
-    const clickSound = document.getElementById('click-sound');
-
-    // --- Función de Audio Mejorada para Clics ---
+    
     const playClickSound = () => {
-        if (clickSound) {
-            const soundToPlay = clickSound.cloneNode();
-            soundToPlay.volume = sfxVolume; // Usa la variable de volumen global de SFX
-            soundToPlay.play().catch(e => console.error("Error al reproducir sonido de clic:", e));
-        }
+        // Implementación de sonido de clic si se añade un <audio> para ello
     };
 
     const playBackgroundMusic = () => {
@@ -202,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Asignación de Eventos (Event Listeners) ---
 
-    // Pantalla de Idioma
     document.querySelectorAll('#language-selector button').forEach(button => button.addEventListener('click', () => {
         playClickSound();
         setLanguage(button.dataset.lang);
@@ -210,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
         runLoreSequence();
     }));
 
-    // Configuración de Volumen
     masterVolumeSlider.addEventListener('input', (e) => {
         masterVolume = e.target.value;
         ls.setItem('eg_masterVolume', masterVolume);
@@ -222,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
         glitchSound.volume = sfxVolume;
     });
 
-    // Botones del Menú Principal
     document.getElementById('new-game-btn').addEventListener('click', () => { playClickSound(); renderSaveSlots(true); });
     document.getElementById('load-game-btn').addEventListener('click', () => { playClickSound(); renderSaveSlots(false); });
     document.getElementById('options-btn').addEventListener('click', () => {
@@ -236,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
         creditsOverlay.classList.remove('hidden');
     });
 
-    // Botones dentro de Overlays
     document.getElementById('close-options-btn').addEventListener('click', () => { playClickSound(); optionsOverlay.classList.add('hidden'); });
     document.getElementById('close-credits-btn').addEventListener('click', () => { playClickSound(); creditsOverlay.classList.add('hidden'); });
     document.getElementById('close-slots-btn').addEventListener('click', () => { playClickSound(); saveSlotsOverlay.classList.add('hidden'); });

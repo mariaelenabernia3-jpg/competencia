@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>El Glitch Existencial - Etapa 2</title>
     <link rel="stylesheet" href="game2.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +49,10 @@
                         <span data-text-key="pcLevelStat"></span>
                         <span id="pc-level-display">1</span>
                     </div>
+                     <div class="stat-item">
+                        <span data-text-key="bitsPerSecond"></span>
+                        <span id="bps-display">0</span>
+                    </div>
                     <div class="stat-item">
                         <span data-text-key="bitsStat"></span>
                         <span id="bits-display">0</span>
@@ -59,6 +63,7 @@
                     <button id="create-game-btn" data-text-key="createGameBtn"></button>
                     <button id="eat-btn" data-text-key="eatBtn"></button>
                     <button id="shop-btn" data-text-key="shopBtn"></button>
+                    <button id="create-glitch-btn" data-text-key="createGlitchBtnWithCost" class="glitch-button" disabled></button>
                 </div>
             </div>
             <div id="right-panel">
@@ -69,6 +74,17 @@
                         <div id="progress-bar-fill"></div>
                     </div>
                     <button id="tap-btn" data-text-key="tapBtn"></button>
+                </div>
+                <!-- Panel de Pelea contra Hacker (Ahora se activa aleatoriamente) -->
+                <div id="hacker-minigame-panel" class="panel hidden">
+                    <h4 data-text-key="hackerMinigameTitle"></h4>
+                    <p class="stat-label">TÚ</p>
+                    <div class="fight-progress-bar"><div id="player-progress-bar-fill"></div></div>
+                    <p class="stat-label">HACKER</p>
+                    <div class="fight-progress-bar"><div id="hacker-progress-bar-fill"></div></div>
+                    <p id="hacker-result-text"></p>
+                    <button id="hacker-tap-btn" data-text-key="tapBtn">ATACAR</button>
+                    <button id="hacker-close-btn" data-text-key="closeBtn" class="hidden">OK</button>
                 </div>
             </div>
         </div>
@@ -85,6 +101,12 @@
             <button id="close-shop-btn" data-text-key="closeBtn"></button>
         </div>
     </div>
+
+    <!-- Overlay para el efecto de Glitch -->
+    <div id="glitch-overlay" class="hidden"></div>
+    
+    <!-- Elemento de Audio para el Glitch -->
+    <audio id="glitch-sound" src="audio/glitch_01-226601.mp3" preload="auto"></audio>
 
     <script src="game2.js"></script>
 </body>

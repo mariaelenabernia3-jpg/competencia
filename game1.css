@@ -73,6 +73,7 @@ canvas {
     align-items: center;
     cursor: pointer;
     user-select: none;
+    touch-action: manipulation;
 }
 .control-btn:active { background-color: rgba(255, 255, 255, 0.5); }
 #btn-left { bottom: 0; left: 20px; }
@@ -111,7 +112,6 @@ canvas {
     }
 }
 
-
 #heal-overlay {
     position: fixed;
     top: 0;
@@ -142,26 +142,15 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
+    touch-action: manipulation;
 }
 
 @keyframes heart-pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 30px #ff4757;
-    }
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 0 50px #feca57;
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 30px #ff4757;
-    }
+    0% { transform: scale(1); box-shadow: 0 0 30px #ff4757; }
+    50% { transform: scale(1.1); box-shadow: 0 0 50px #feca57; }
+    100% { transform: scale(1); box-shadow: 0 0 30px #ff4757; }
 }
 
-/* ... (todo tu CSS existente va aquí) ... */
-
-/* ===== NUEVO: Estilos para la pantalla de carga y overlays ===== */
 .hidden {
     display: none !important;
 }
@@ -211,12 +200,6 @@ canvas {
 }
 
 @keyframes flicker {
-    from {
-        box-shadow: 0 0 15px #0F0, 0 0 30px #ff00ff;
-        border-top-color: #ff00ff;
-    }
-    to {
-        box-shadow: 0 0 25px #00bfff, 0 0 45px #0F0;
-        border-top-color: #00bfff;
-    }
+    from { box-shadow: 0 0 15px #0F0, 0 0 30px #ff00ff; border-top-color: #ff00ff; }
+    to { box-shadow: 0 0 25px #00bfff, 0 0 45px #0F0; border-top-color: #00bfff; }
 }

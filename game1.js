@@ -5,14 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const healButton = document.getElementById('heal-button');
     const loadingScreen = document.getElementById('loading-screen');
     const loadingDialogue = document.getElementById('loading-dialogue');
-    
-    // --- NUEVO: Selector y configuración del sonido de glitch ---
     const glitchSound = document.getElementById('glitch-sound');
+    
     const sfxVolume = localStorage.getItem('eg_sfxVolume') || 1.0;
     if (glitchSound) {
         glitchSound.volume = sfxVolume;
     }
-    // --- FIN ---
 
     const currentLanguage = localStorage.getItem('eg_language') || 'es';
 
@@ -92,10 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isTransitioning = false;
         if (assets.ground) { groundPattern = ctx.createPattern(assets.ground, 'repeat'); }
         platforms = [ { x: -1000, y: 590, width: 10000, height: 50 }, { x: 200, y: 450, width: 150, height: 20 }, { x: 450, y: 350, width: 150, height: 20 }, { x: 700, y: 450, width: 200, height: 20 }, { x: 1000, y: 400, width: 150, height: 20 }, { x: 1200, y: 300, width: 150, height: 20 }, { x: 1400, y: 200, width: 50, height: 20 }, { x: 1600, y: 350, width: 250, height: 20 }, { x: 1950, y: 280, width: 150, height: 20 } ];
-        
-        // ===== CORRECCIÓN DEL ERROR DE TIPEO =====
         decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DECORATION_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
-        
         coins = [ { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false }, { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false }, { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false }, ];
         gameLoop();
     }
@@ -209,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (goodCoinsCollected === 5 && !hasTriggeredSystemSequence) {
                         hasTriggeredSystemSequence = true;
-                        if (glitchSound) glitchSound.play(); // --- NUEVO: Reproducir sonido ---
+                        if (glitchSound) glitchSound.play();
                         gameState = 'SYSTEM_ALERT_INTRO';
                         systemAlertPhase = 'FADING_IN'; systemAlertAlpha = 0; systemAlertTimer = 0;
                         systemAlertTextProgress = 0;
