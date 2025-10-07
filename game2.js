@@ -5,9 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
         continuePrompt: { es: "[Toca para continuar]", en: "[Tap to continue]" },
         act2: { es: "Acto 2", en: "Act 2" },
         act2Subtitle: { es: "El Mundo Idle", en: "The Idle World" },
+        // ===== DIÁLOGO ACTUALIZADO =====
         introDialogues: {
-            es: ["¿Qué rayos fue esa voz?", "¿Y las plataformas dónde están?", "Bueno, al menos ya no tengo el aspecto bugueado que tenía antes.", "Vaya mierda, ahora estoy algo mejor, pero...", "... ¿dónde estoy?"],
-            en: ["What the hell was that voice?", "And where are the platforms?", "Well, at least I don't have that buggy look I had before.", "What a mess, I'm a bit better now, but...", "... where am I?"]
+            es: ["¿Qué rayos fue esa voz?", "¿Y las plataformas dónde están?", "¿Qué coño soy, una foto sacada de Google?", "Bueno, es mejor que el personaje bugueado que tenía, vaya mierda.", "... ¿dónde estoy?"],
+            en: ["What the hell was that voice?", "And where are the platforms?", "What the hell am I, a picture from Google?", "Well, it's better than the buggy character I had, what a mess.", "... where am I?"]
         },
         statsTitle: { es: "Estado", en: "Status" },
         energyStat: { es: "⚡ Energía:", en: "⚡ Energy:" },
@@ -102,24 +103,34 @@ document.addEventListener('DOMContentLoaded', () => {
         characterDialogue.classList.remove('hidden');
         for (const line of game2Texts.introDialogues[lang]) {
             characterDialogueText.textContent = line;
-            await delay(3500);
+            await delay(4000); // Aumentamos un poco el tiempo para leer mejor
         }
         characterDialogue.classList.add('hidden');
     }
 
+    // ===== LÓGICA DE SECUENCIA CORREGIDA =====
     async function startIntroSequence() {
+        // 1. Mostrar el contenedor principal. Es el "escenario" y debe estar visible.
+        gameContainer.classList.remove('hidden');
+
+        // 2. Mostrar la pantalla de título DENTRO del escenario.
         titleScreenOverlay.classList.remove('hidden');
         await delay(4000);
         titleScreenOverlay.classList.add('hidden');
-        await delay(500);
-
+        
+        // 3. Mostrar al personaje DENTRO del escenario.
         characterContainer.classList.remove('hidden');
         await delay(1000);
+        
+        // 4. Iniciar diálogos.
         await showIntroDialogues();
 
+        // 5. Mover personaje y mostrar la interfaz.
         characterContainer.classList.add('in-corner');
-        await delay(1500);
+        await delay(1500); // Esperar a que la animación de movimiento termine.
         mainInterface.classList.remove('hidden');
+        
+        // 6. El juego comienza.
         initializeGame();
     }
 
@@ -229,8 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isFirstVisit) {
         loreOverlay.addEventListener('click', () => {
             loreOverlay.classList.add('hidden');
-            // ===== CORRECCIÓN CLAVE: Mostrar el contenedor principal ANTES de la secuencia =====
-            gameContainer.classList.remove('hidden');
             localStorage.setItem('eg_game2_intro_completed', 'true');
             startIntroSequence();
         }, { once: true });
