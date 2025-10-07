@@ -22,12 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
         tapBtn: { es: "Tocar", en: "Tap" },
         shopTitle: { es: "Tienda", en: "Shop" },
         closeBtn: { es: "Cerrar", en: "Close" },
-        // Mensajes del personaje
         noEnergy: { es: "Estoy demasiado cansado para esto... (Necesitas 20 de energía)", en: "I'm too tired for this... (You need 20 energy)" },
         noBits: { es: "No tengo suficientes Bits para esto.", en: "I don't have enough Bits for this." },
         gameCreated: { es: "¡Juego creado! Eso debería darme algunos Bits.", en: "Game created! That should give me some Bits." },
         ateFood: { es: "¡Ah, mucho mejor!", en: "Ah, much better!" },
-        // Nombres de items de la tienda
         improvePC: { es: "Mejorar PC a Nivel", en: "Upgrade PC to Level" },
         buyBed: { es: "Comprar Cama", en: "Buy Bed" },
         buyTable: { es: "Comprar Mesa", en: "Buy Table" },
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.textContent = game2Texts[key][lang];
             }
         });
-        // Actualizar nombres de items por si cambia el idioma
         gameState.items.cama.name = game2Texts.buyBed[lang];
         gameState.items.mesa.name = game2Texts.buyTable[lang];
         gameState.items.silla.name = game2Texts.buyChair[lang];
@@ -143,16 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameProgress = 0;
     createGameBtn.addEventListener('click', () => {
         if (gameState.energy < 20) {
-            showCharacterMessage('noEnergy');
-            return;
+            showCharacterMessage('noEnergy'); return;
         }
         gameState.energy -= 20;
         gameProgress = 0;
         progressBarFill.style.width = '0%';
         minigamePanel.classList.remove('hidden');
-        createGameBtn.disabled = true;
-        eatBtn.disabled = true;
-        shopBtn.disabled = true;
+        createGameBtn.disabled = true; eatBtn.disabled = true; shopBtn.disabled = true;
         updateUI();
     });
 
@@ -164,17 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
             gameState.bits += bitsEarned;
             showCharacterMessage('gameCreated');
             minigamePanel.classList.add('hidden');
-            createGameBtn.disabled = false;
-            eatBtn.disabled = false;
-            shopBtn.disabled = false;
+            createGameBtn.disabled = false; eatBtn.disabled = false; shopBtn.disabled = false;
             updateUI();
         }
     });
 
     eatBtn.addEventListener('click', () => {
         if (gameState.bits < 5) {
-            showCharacterMessage('noBits');
-            return;
+            showCharacterMessage('noBits'); return;
         }
         gameState.bits -= 5;
         gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + 15);
@@ -216,29 +207,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (itemId === 'pc') {
             const cost = 50 * Math.pow(2, gameState.pcLevel);
             if (gameState.bits >= cost) {
-                gameState.bits -= cost;
-                gameState.pcLevel++;
+                gameState.bits -= cost; gameState.pcLevel++;
             }
         } else {
             const item = gameState.items[itemId];
             if (gameState.bits >= item.cost) {
-                gameState.bits -= item.cost;
-                item.owned = true;
+                gameState.bits -= item.cost; item.owned = true;
                 gameState.maxEnergy += item.energyBonus;
-                gameState.energy = gameState.maxEnergy; // Curar al máximo
+                gameState.energy = gameState.maxEnergy;
             }
         }
-        updateUI();
-        renderShop();
+        updateUI(); renderShop();
     }
 
-    shopBtn.addEventListener('click', () => {
-        renderShop();
-        shopOverlay.classList.remove('hidden');
-    });
-    closeShopBtn.addEventListener('click', () => {
-        shopOverlay.classList.add('hidden');
-    });
+    shopBtn.addEventListener('click', () => { renderShop(); shopOverlay.classList.remove('hidden'); });
+    closeShopBtn.addEventListener('click', () => { shopOverlay.classList.add('hidden'); });
 
     // --- INITIALIZATION ---
     applyText();
@@ -246,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isFirstVisit) {
         loreOverlay.addEventListener('click', () => {
             loreOverlay.classList.add('hidden');
+            // ===== CORRECCIÓN CLAVE: Mostrar el contenedor principal ANTES de la secuencia =====
+            gameContainer.classList.remove('hidden');
             localStorage.setItem('eg_game2_intro_completed', 'true');
             startIntroSequence();
         }, { once: true });
