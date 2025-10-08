@@ -4,42 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>El Glitch Existencial - Etapa 3</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #000;
-            color: #ff00ff;
-            font-family: 'VT323', monospace;
-            text-align: center;
-            overflow: hidden;
-        }
-        .content {
-            animation: fadeIn 3s ease-in;
-        }
-        h1 {
-            font-size: clamp(2.5rem, 10vw, 4rem);
-            text-shadow: 0 0 15px #ff00ff;
-        }
-        p {
-            font-size: clamp(1.2rem, 5vw, 1.5rem);
-            color: #fff;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="game3.css">
 </head>
 <body>
-    <div class="content">
-        <h1>Acto 3</h1>
-        <p>La Corrupción</p>
+
+    <!-- CARTELES DE ESTADO Y OVERLAYS -->
+    <div id="respawn-overlay" class="hidden"><h1>RENACIENDO...</h1></div>
+    <div id="round-overlay" class="hidden"><h1 id="round-text"></h1></div>
+    <div id="glitch-overlay" class="hidden"></div>
+
+    <!-- PANTALLA DE MEJORA EN LA MUERTE -->
+    <div id="death-upgrade-overlay" class="hidden">
+        <div class="death-upgrade-panel">
+            <h2>Has caído... pero tus datos persisten.</h2>
+            <p>Usa tus datos corruptos para fortalecerte antes de renacer.</p>
+            <p id="death-upgrade-data-display" class="data-text"></p>
+            <div id="death-upgrade-options"></div>
+            <button id="death-upgrade-continue-btn">Continuar</button>
+        </div>
     </div>
+
+    <!-- SECUENCIA DE DIÁLOGO DEL JEFE FINAL -->
+    <div id="dialogue-overlay" class="hidden">
+        <div class="dialogue-box">
+            <h2 id="dialogue-speaker"></h2>
+            <p id="dialogue-line"></p>
+            <button id="start-final-battle-btn" class="hidden">Comenzar Batalla</button>
+        </div>
+    </div>
+
+    <div id="floating-text-container"></div>
+
+    <!-- INTROS DEL JUEGO -->
+    <div id="pre-game-intro" class="hidden">
+        <img src="imagenes/personaje-rpg.png" alt="Jugador">
+        <p id="pre-game-dialogue"></p>
+        <button id="pre-game-btn" class="hidden"></button>
+    </div>
+    <div id="intro-sequence" class="hidden">
+        <div id="dialogue-container" class="intro-overlay">
+            <p id="dialogue1" class="dialogue-text"></p>
+            <p id="dialogue2" class="dialogue-text"></p>
+            <p id="dialogue3" class="dialogue-text"></p>
+            <p id="dialogue4" class="dialogue-text"></p>
+        </div>
+        <div id="glitched-message-container" class="intro-overlay hidden">
+             <p id="glitched-message"></p>
+        </div>
+        <div id="cinematic-container" class="intro-overlay hidden">
+            <div><h1>Acto 3</h1><h2>El Mundo RPG</h2></div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+    <div id="game-container" class="hidden">
+        <div id="combat-zone">
+            <div id="player-display" class="character-display">
+                <div id="player-dialogue-bubble" class="dialogue-bubble hidden"></div>
+                <img src="imagenes/personaje-rpg.png" alt="Jugador"><h3>TÚ</h3>
+                <div class="health-bar"><div id="player-hp-fill" class="health-bar-fill"></div></div>
+                <p id="player-hp-text"></p>
+            </div>
+            <div id="enemy-display" class="character-display">
+                <img id="enemy-sprite" src="imagenes/esqueleto-rpg.png" alt="Enemigo"><h3 id="enemy-name"></h3>
+                <div class="health-bar"><div id="enemy-hp-fill" class="health-bar-fill"></div></div>
+                <p id="enemy-hp-text"></p>
+            </div>
+        </div>
+        <div id="action-log"></div>
+        <div id="player-hub">
+            <div id="skills-bar">
+                <button id="skill1" class="skill-btn" data-skill="golpeFuerte">⚔️<div class="cooldown-overlay"></div></button>
+                <button id="skill2" class="skill-btn" data-skill="sanacion">❤️<div class="cooldown-overlay"></div></button>
+                <button id="skill3" class="skill-btn" data-skill="escudo">🛡️<div class="cooldown-overlay"></div></button>
+            </div>
+            <div id="stats-display">
+                <p id="data-display">Datos: 0</p>
+            </div>
+        </div>
+    </div>
+
+    <audio id="glitch-sound" src="audio/glitch_01-226601.mp3"></audio>
+    <script src="game3.js"></script>
+
 </body>
 </html>

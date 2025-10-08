@@ -1,0 +1,244 @@
+:root {
+    --primary-color: #00ff00;
+    --background-color: #0d0d0d;
+    --panel-bg: rgba(10, 0, 20, 0.7);
+    --border-color: #4d004d;
+    --player-hp-color: #00ff00;
+    --enemy-hp-color: #ff4757;
+    --xp-color: #00ffff;
+    --glitch-color: #ff00ff;
+}
+
+body {
+    background-image: url('imagenes/fondo-rpg.png');
+    background-size: cover;
+    background-position: center;
+    background-color: var(--background-color);
+    color: #fff;
+    font-family: 'VT323', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* --- Intros y Transiciones --- */
+#pre-game-intro {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #000; z-index: 200;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; padding: 20px;
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out;
+}
+.fade-out { opacity: 0 !important; }
+#pre-game-intro img { width: 128px; height: 128px; object-fit: contain; margin-bottom: 20px; }
+#pre-game-intro p { font-size: clamp(1.4rem, 5vw, 2rem); max-width: 600px; margin-bottom: 25px; }
+#pre-game-intro button {
+    font-family: 'Press Start 2P', cursive; font-size: 1.2rem;
+    padding: 10px 20px; color: var(--primary-color);
+    background-color: transparent; border: 2px solid var(--primary-color);
+    cursor: pointer; box-shadow: 0 0 10px var(--primary-color);
+}
+#game-container {
+    width: 100%; height: 100%; max-width: 900px; max-height: 600px;
+    display: flex; flex-direction: column;
+    border: 2px solid var(--border-color); box-shadow: 0 0 25px var(--glitch-color);
+    background-color: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+    position: relative;
+}
+
+/* --- Pantallas de Introducción --- */
+.intro-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #000; z-index: 100;
+    display: flex; justify-content: center; align-items: center; text-align: center;
+    padding: 20px; box-sizing: border-box;
+}
+#dialogue-container { flex-direction: column; gap: 15px; }
+.dialogue-text { font-size: clamp(1.4rem, 5vw, 2.2rem); opacity: 0; transition: opacity 1.5s ease-in-out; line-height: 1.4; }
+#glitched-message { font-family: 'Press Start 2P', cursive; font-size: clamp(1.5rem, 6vw, 2.8rem); color: #fff; text-shadow: 0 0 2px #ff00ff; animation: text-flicker 2s infinite; }
+#cinematic-container h1 { font-family: 'Press Start 2P', cursive; font-size: clamp(3rem, 12vw, 6rem); }
+#cinematic-container h2 { font-size: clamp(1.5rem, 7vw, 3rem); }
+
+/* --- Interfaz del Juego --- */
+#combat-zone { flex-grow: 1; display: flex; justify-content: space-around; align-items: center; padding: 20px; }
+.character-display { text-align: center; position: relative; }
+.character-display img { width: 128px; height: 128px; object-fit: contain; filter: drop-shadow(0 0 10px #000); }
+.character-display h3 { margin: 5px 0; font-family: 'Press Start 2P', cursive; font-size: 1.2rem; }
+.health-bar { width: 150px; height: 20px; background-color: #333; border: 1px solid var(--border-color); margin: 0 auto; }
+.health-bar-fill { height: 100%; transition: width 0.3s linear; }
+#player-hp-fill { background-color: var(--player-hp-color); }
+#enemy-hp-fill { background-color: var(--enemy-hp-color); }
+
+/* Burbuja de Diálogo */
+.dialogue-bubble {
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    background-color: rgba(10, 0, 20, 0.9); border: 1px solid var(--border-color);
+    padding: 8px; border-radius: 5px; font-size: 0.9rem;
+    width: 180px; text-align: center; z-index: 10;
+}
+.dialogue-bubble::after {
+    content: ''; position: absolute; bottom: -10px; left: 50%;
+    transform: translateX(-50%); width: 0; height: 0;
+    border-left: 10px solid transparent; border-right: 10px solid transparent;
+    border-top: 10px solid var(--border-color);
+}
+
+#action-log { height: 120px; background-color: var(--panel-bg); border-top: 2px solid var(--border-color); border-bottom: 2px solid var(--border-color); padding: 10px; overflow-y: scroll; font-size: 1.1rem; }
+#action-log p { margin: 0 0 5px 0; }
+.player-log { color: var(--primary-color); }
+.enemy-log { color: var(--enemy-hp-color); }
+.system-log { color: var(--xp-color); }
+
+#player-hub { display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: rgba(0,0,0,0.8); }
+#skills-bar { display: flex; gap: 10px; }
+.skill-btn { width: 60px; height: 60px; font-family: 'Press Start 2P', cursive; font-size: 1.5rem; color: #fff; background-color: #333; border: 2px solid var(--border-color); cursor: pointer; position: relative; overflow: hidden; }
+.skill-btn .cooldown-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); color: #fff; font-size: 1.5rem; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+.skill-btn:disabled { color: #666; background-color: #111; border-color: #222; cursor: not-allowed; }
+.skill-btn:disabled .cooldown-overlay { opacity: 1; }
+#stats-display { text-align: right; }
+#data-display { font-size: 1.4rem; color: var(--glitch-color); margin-bottom: 5px; }
+
+/* --- PANTALLA DE MEJORA EN MUERTE --- */
+#death-upgrade-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 5500;
+    display: flex; justify-content: center; align-items: center;
+    color: #fff; text-align: center;
+    padding: 20px; box-sizing: border-box;
+}
+.death-upgrade-panel {
+    background-color: var(--panel-bg);
+    border: 2px solid var(--border-color);
+    padding: 2rem;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.death-upgrade-panel h2 { font-family: 'Press Start 2P', cursive; color: var(--enemy-hp-color); font-size: clamp(1.4rem, 5vw, 1.8rem); margin-bottom: 1rem; }
+.death-upgrade-panel p { font-size: 1.2rem; color: #ccc; }
+.death-upgrade-panel .data-text { font-size: 1.5rem; color: var(--glitch-color); margin: 1rem 0; font-weight: bold; }
+#death-upgrade-options {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px; margin: 2rem 0;
+}
+.upgrade-option button {
+    font-family: 'VT323', monospace; font-size: 1.2rem; background: #222;
+    color: #eee; border: 1px solid var(--border-color);
+    padding: 10px; cursor: pointer; transition: background-color 0.2s, color 0.2s;
+    width: 100%;
+}
+.upgrade-option button:hover:not(:disabled) { background-color: var(--primary-color); color: #000; }
+.upgrade-option button:disabled { background-color: #111; color: #555; border-color: #222; cursor: not-allowed; }
+#death-upgrade-continue-btn {
+    font-family: 'Press Start 2P', cursive; font-size: clamp(1rem, 4vw, 1.3rem); padding: 15px 30px;
+    color: var(--xp-color); background-color: transparent;
+    border: 2px solid var(--xp-color); cursor: pointer;
+    box-shadow: 0 0 10px var(--xp-color); margin-top: 1rem;
+}
+
+/* --- DIÁLOGO JEFE FINAL --- */
+#dialogue-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.9); z-index: 7000;
+    display: flex; justify-content: center; align-items: center;
+    padding: 20px; box-sizing: border-box;
+}
+.dialogue-box {
+    background-color: var(--panel-bg);
+    border: 2px solid var(--border-color);
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+.dialogue-box h2 {
+    font-family: 'Press Start 2P', cursive;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    margin-bottom: 1.5rem;
+}
+.dialogue-box #dialogue-line {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    min-height: 100px;
+    line-height: 1.5;
+}
+#start-final-battle-btn {
+    font-family: 'Press Start 2P', cursive; font-size: 1.3rem; padding: 15px 30px;
+    color: var(--primary-color); background-color: transparent;
+    border: 2px solid var(--primary-color); cursor: pointer;
+    box-shadow: 0 0 15px var(--primary-color); margin-top: 2rem;
+}
+
+/* --- EFECTOS VISUALES --- */
+.screen-shake {
+    animation: screen-shake 0.4s linear;
+}
+@keyframes screen-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateY(-5px); }
+}
+
+#glitch-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 8000;
+    background-color: #000;
+    overflow: hidden;
+    animation: text-flicker 3s infinite;
+}
+#glitch-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(0deg, rgba(255, 0, 255, 0.3) 0%, rgba(0, 255, 255, 0.4) 100%);
+    animation: glitch-anim 0.5s infinite alternate;
+}
+@keyframes glitch-anim {
+    0% { transform: translate(-10px, 10px); opacity: 0.3; }
+    100% { transform: translate(10px, -10px); opacity: 0.8; }
+}
+
+
+#floating-text-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5000; }
+.floating-text { position: absolute; font-size: 1.8rem; font-family: 'Press Start 2P', cursive; animation: float-up 2s forwards; text-shadow: 0 0 5px #000; }
+.player-damage { color: var(--player-hp-color); }
+.enemy-damage { color: var(--enemy-hp-color); }
+
+@keyframes float-up { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-80px); opacity: 0; } }
+@keyframes text-flicker { 0%, 100% { opacity: 1; text-shadow: 0 0 5px #ff00ff; } 50% { opacity: 0.8; text-shadow: 0 0 15px #ff00ff; } }
+
+/* --- ESTILOS PARA CARTELES --- */
+#respawn-overlay, #round-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); z-index: 6000;
+    display: flex; justify-content: center; align-items: center;
+}
+#respawn-overlay h1 { color: var(--enemy-hp-color); text-shadow: 0 0 15px var(--enemy-hp-color); animation: text-flicker 1.5s infinite; }
+#round-overlay h1 { color: var(--xp-color); text-shadow: 0 0 15px var(--xp-color); animation: text-flicker 2s infinite; }
+#respawn-overlay h1, #round-overlay h1 { font-family: 'Press Start 2P', cursive; font-size: clamp(2.5rem, 10vw, 5rem); }
+
+@media (max-width: 700px) {
+    body { height: 100svh; }
+    #game-container { max-height: none; border: none; box-shadow: none; }
+    #combat-zone { flex-direction: column; justify-content: center; gap: 20px; flex-grow: 1; }
+    .character-display img { width: 120px; height: 120px; }
+    .health-bar { width: 140px; }
+    #action-log { height: 100px; font-size: 1rem; }
+    #player-hub { flex-direction: column; gap: 15px; padding: 15px 10px; }
+    #stats-display { text-align: center; background-color: var(--panel-bg); padding: 5px; border-radius: 5px; width: 100%; }
+    #skills-bar { justify-content: center; width: 100%; }
+    .skill-btn { width: 70px; height: 70px; font-size: 2rem; }
+    #death-upgrade-options { grid-template-columns: 1fr; }
+}
