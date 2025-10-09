@@ -41,26 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const startFinalBattleBtn = document.getElementById('start-final-battle-btn');
     
     // --- VARIABLES DEL JUEGO ---
-    let player = { hp: 100, maxHp: 100, attack: 10, defense: 0, critChance: 0.05, critDamage: 1.5, luck: 1.0 };
-    let enemy = {};
-    let corruptData = 0;
-    let wave = 1;
-    let currentRound = 1;
+    let player, enemy, corruptData, wave, currentRound, upgrades, skills, collectedLore;
     let autoAttackInterval;
     let isCombatActive = true;
     let isFinalBossSequence = false;
-    let collectedLore = [];
-
+    
     // --- ESTRUCTURA DE DATOS DEL JUEGO ---
-    const upgrades = {
-        salud: { label: "Salud", baseCost: 10, costMultiplier: 1.2, value: 20, level: 0 },
-        ataque: { label: "Ataque", baseCost: 15, costMultiplier: 1.3, value: 3, level: 0 },
-        defensa: { label: "Defensa", baseCost: 20, costMultiplier: 1.3, value: 2, level: 0 },
-        critico: { label: "Crítico", baseCost: 25, costMultiplier: 1.5, value: 0.02, level: 0 }, 
-        suerte: { label: "Suerte", baseCost: 40, costMultiplier: 1.6, value: 0.1, level: 0 } 
-    };
-    const skills = { golpeFuerte: { cooldown: 10, currentCooldown: 0 }, sanacion: { cooldown: 20, currentCooldown: 0 }, escudo: { cooldown: 30, currentCooldown: 0, active: false, turns: 0 } };
-
     const allRoundsEnemies = [
         [ { name: "Slime de Datos", hp: 50, attack: 5, sprite: "imagenes/esqueleto-rpg.png", data: 15 }, { name: "Bug Compilado", hp: 80, attack: 8, sprite: "imagenes/esqueleto2-rpg.png", data: 25 }, { name: "Firewall Roto", hp: 120, attack: 12, sprite: "imagenes/esqueleto3-rpg.png", data: 40 }, { name: "GUARDIÁN DEL SISTEMA", hp: 300, attack: 20, sprite: "imagenes/guardiadelsistema1-rpg.png", data: 150 } ],
         [ { name: "Protocolo de Defensa Alfa", hp: 200, attack: 25, sprite: "imagenes/guardiadelsistema1-rpg.png", data: 50 }, { name: "Centinela de Red Beta", hp: 220, attack: 22, sprite: "imagenes/guardiadelsistema2-rpg.png", data: 60 }, { name: "Agente de Purga Gamma", hp: 180, attack: 28, sprite: "imagenes/guardiadelsistema3-rpg.png", data: 70 }, { name: "EL KERNEL CORRUPTO", hp: 500, attack: 35, sprite: "imagenes/jefedelsistema1.png", data: 300 } ],
@@ -77,22 +63,80 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const sleep = ms => new Promise(res => setTimeout(res, ms));
+    const activeSlot = localStorage.getItem('eg_active_slot');
 
-    function saveGame() { const gameState = { player, corruptData, wave, currentRound, upgrades, collectedLore }; localStorage.setItem('eg_game3_state', JSON.stringify(gameState)); }
-    function loadGame() {
-        const savedState = localStorage.getItem('eg_game3_state');
-        if (savedState) {
-            const gameState = JSON.parse(savedState);
-            if (gameState.player) Object.assign(player, gameState.player);
-            corruptData = Number(gameState.corruptData) || 0;
-            wave = Number(gameState.wave) || 1;
-            currentRound = Number(gameState.currentRound) || 1;
-            collectedLore = gameState.collectedLore || [];
-            if (gameState.upgrades) {
-                Object.keys(upgrades).forEach(key => { if (gameState.upgrades[key]) upgrades[key].level = Number(gameState.upgrades[key].level) || 0; });
+    // --- LÓGICA DE GUARDADO Y CARGA ---
+    function saveGame() {
+        if (activeSlot === null) return;
+        
+        const stateToSave = { 
+            player, corruptData, wave, currentRound, upgrades, collectedLore 
+        };
+
+        try {
+            let masterState = JSON.parse(localStorage.getItem('eg_current_game_state'));
+            if (!masterState) masterState = {};
+
+            masterState.current_game = 'game3';
+            masterState.game3_data = stateToSave;
+
+            localStorage.setItem('eg_current_game_state', JSON.stringify(masterState));
+
+            let allSlots = JSON.parse(localStorage.getItem('eg_saveSlots'));
+            if (allSlots && allSlots[activeSlot] !== undefined) {
+                allSlots[activeSlot] = masterState;
+                localStorage.setItem('eg_saveSlots', JSON.stringify(allSlots));
             }
+        } catch (e) {
+            console.error("Error al guardar el juego:", e);
         }
-        updateBackground();
+    }
+    
+    function initNewGame() {
+        player = { hp: 100, maxHp: 100, attack: 10, defense: 0, critChance: 0.05, critDamage: 1.5, luck: 1.0 };
+        enemy = {};
+        corruptData = 0;
+        wave = 1;
+        currentRound = 1;
+        collectedLore = [];
+        upgrades = {
+            salud: { label: "Salud", baseCost: 10, costMultiplier: 1.2, value: 20, level: 0 },
+            ataque: { label: "Ataque", baseCost: 15, costMultiplier: 1.3, value: 3, level: 0 },
+            defensa: { label: "Defensa", baseCost: 20, costMultiplier: 1.3, value: 2, level: 0 },
+            critico: { label: "Crítico", baseCost: 25, costMultiplier: 1.5, value: 0.02, level: 0 }, 
+            suerte: { label: "Suerte", baseCost: 40, costMultiplier: 1.6, value: 0.1, level: 0 } 
+        };
+        skills = { golpeFuerte: { cooldown: 10, currentCooldown: 0 }, sanacion: { cooldown: 20, currentCooldown: 0 }, escudo: { cooldown: 30, currentCooldown: 0, active: false, turns: 0 } };
+    }
+
+    function loadGame() {
+        initNewGame(); // Inicializa con valores por defecto primero
+        if (activeSlot === null) return false;
+
+        try {
+            const masterState = JSON.parse(localStorage.getItem('eg_current_game_state'));
+            if (masterState && masterState.game3_data) {
+                const saved = masterState.game3_data;
+                // Sobrescribe los valores por defecto con los guardados
+                player = { ...player, ...saved.player };
+                corruptData = saved.corruptData || 0;
+                wave = saved.wave || 1;
+                currentRound = saved.currentRound || 1;
+                collectedLore = saved.collectedLore || [];
+                // Carga los niveles de las mejoras
+                if (saved.upgrades) {
+                    for (const key in upgrades) {
+                        if (saved.upgrades[key]) {
+                            upgrades[key].level = saved.upgrades[key].level || 0;
+                        }
+                    }
+                }
+                return true;
+            }
+        } catch (e) {
+            console.error("Error al cargar el juego:", e);
+        }
+        return false;
     }
     
     function updateBackground() {
@@ -100,12 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.backgroundImage = "url('imagenes/ronda1.png')";
         } else if (currentRound === 2) {
             document.body.style.backgroundImage = "url('imagenes/ronda2.png')";
-        } else { // Ronda 3 y más allá
+        } else {
             document.body.style.backgroundImage = "url('imagenes/ronda3.png')";
         }
     }
 
     function showPlayerDialogue(text, duration = 4000) { playerDialogueBubble.textContent = text; playerDialogueBubble.classList.remove('hidden'); setTimeout(() => playerDialogueBubble.classList.add('hidden'), duration); }
+    
     function startCharacterIntro() {
         preGameIntroContainer.classList.remove('hidden');
         preGameDialogue.textContent = "Ugh... mi cabeza. ¿Dónde estoy ahora? ¿Una armadura? Se siente... sólido. Esto es diferente.";
@@ -163,10 +208,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 6000);
     }
     
-    function startGame() { updateBackground(); isCombatActive = true; spawnNextEnemy(); autoAttackInterval = setInterval(playerAutoAttack, 2000); setInterval(updateCooldowns, 1000); updateUI(); }
+    function startGame() { 
+        updateBackground(); 
+        isCombatActive = true; 
+        spawnNextEnemy(); 
+        autoAttackInterval = setInterval(playerAutoAttack, 2000); 
+        setInterval(updateCooldowns, 1000);
+        setInterval(saveGame, 3000); // Guardado periódico
+        updateUI(); 
+    }
     
     function spawnNextEnemy() {
         const currentEnemies = allRoundsEnemies[currentRound - 1];
+        if (!currentEnemies) { console.error("Ronda no encontrada:", currentRound); return; }
+
         let enemyData;
         if (currentRound > 1 && wave < currentEnemies.length) {
             const randomEnemies = currentEnemies.slice(0, -1);
@@ -174,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             enemyData = currentEnemies[Math.min(wave - 1, currentEnemies.length - 1)];
         }
-        enemy = { ...enemyData, maxHp: enemyData.hp }; // Añadimos maxHp para la curación del jefe
+        enemy = { ...enemyData, maxHp: enemyData.hp };
         if (enemy.name === "REFLEJO PROGRAMADO") {
             isFinalBossSequence = true;
             isCombatActive = false;
@@ -216,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function playerAutoAttack() {
-        if (!isCombatActive || enemy.hp <= 0 || player.hp <= 0) return;
+        if (!isCombatActive || !enemy || enemy.hp <= 0 || player.hp <= 0) return;
         let damage = player.attack + Math.floor(Math.random() * 5);
         if (Math.random() < player.critChance) {
             damage = Math.floor(damage * player.critDamage);
@@ -232,16 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
         else setTimeout(enemyAttack, 1000);
     }
     function enemyAttack() {
-        if (!isCombatActive || player.hp <= 0 || enemy.hp <= 0) return;
+        if (!isCombatActive || !enemy || player.hp <= 0 || enemy.hp <= 0) return;
         
-        // --- LÓGICA DE CURACIÓN DEL JEFE FINAL ---
         if (enemy.name === "REFLEJO PROGRAMADO" && !enemy.hasHealed && enemy.hp < enemy.maxHp * 0.4) {
-            const healAmount = Math.floor(enemy.maxHp * 0.5); // Se cura un 50% de su vida máxima
+            const healAmount = Math.floor(enemy.maxHp * 0.5);
             enemy.hp = Math.min(enemy.maxHp, enemy.hp + healAmount);
-            enemy.hasHealed = true; // Marca que ya ha usado la curación
+            enemy.hasHealed = true;
             logMessage(`${enemy.name} canaliza datos puros y restaura sus sistemas. ¡Se cura ${healAmount} de vida!`, 'enemy-log');
             updateUI();
-            return; // Termina el turno del enemigo después de curarse
+            return;
         }
 
         if (enemy.name === "EL KERNEL CORRUPTO" && Math.random() < 0.25) {
@@ -287,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function checkForLoreDrop() {
-        if (Math.random() < 0.15) { // 15% de probabilidad de drop
+        if (Math.random() < 0.15) {
             const availableLore = loreFragments.filter(fragment => !collectedLore.includes(fragment));
             if (availableLore.length > 0) {
                 const lorePiece = availableLore[Math.floor(Math.random() * availableLore.length)];
@@ -323,19 +377,18 @@ document.addEventListener('DOMContentLoaded', () => {
         corruptData += dataGained;
         logMessage(`Obtienes ${dataGained} datos corruptos.`, "system-log");
         
-        checkForLoreDrop(); // Comprobar si hay drop de lore
+        checkForLoreDrop();
         
         wave++;
         const currentEnemies = allRoundsEnemies[currentRound - 1];
         if (wave > currentEnemies.length) {
             currentRound++; 
             wave = 1;
-            updateBackground(); // Actualizar fondo al cambiar de ronda
+            updateBackground();
             if (currentRound > allRoundsEnemies.length) {
                 clearInterval(autoAttackInterval);
             } else {
                 logMessage("¡BUCLE SUPERADO!", "system-log");
-                saveGame();
                 let roundName = currentRound === allRoundsEnemies.length ? "Ronda Final" : `Ronda ${currentRound}`;
                 roundText.textContent = roundName;
                 roundOverlay.classList.remove('hidden');
@@ -350,13 +403,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 5000);
             }
         } else {
-            saveGame();
             setTimeout(() => { 
                 isCombatActive = true; 
                 spawnNextEnemy();
                 autoAttackInterval = setInterval(playerAutoAttack, 2000);
             }, 2000);
         }
+        saveGame();
         updateUI();
     }
     
@@ -379,11 +432,11 @@ document.addEventListener('DOMContentLoaded', () => {
             logMessage(`...recalibrando en la ${currentRound === allRoundsEnemies.length ? 'Ronda Final' : 'Ronda ' + currentRound}...`, "system-log");
             wave = 1;
             player.hp = player.maxHp; 
-            updateBackground(); // Asegurarse de que el fondo es correcto al renacer
-            saveGame();
+            updateBackground();
             isCombatActive = true;
             spawnNextEnemy(); 
             autoAttackInterval = setInterval(playerAutoAttack, 2000);
+            saveGame();
             updateUI();
         }, 3500);
     }
@@ -417,38 +470,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'critico': player.critChance += upgrade.value; logMessage(`Mejora: ¡Crítico aumentado a ${(player.critChance * 100).toFixed(0)}%!`, 'system-log'); break;
                 case 'suerte': player.luck += upgrade.value; logMessage(`Mejora: ¡Suerte aumentada! Multiplicador: ${player.luck.toFixed(1)}x`, 'system-log'); break;
             }
-            saveGame(); updateUI(); renderDeathUpgradeOptions();
+            updateUI(); renderDeathUpgradeOptions();
         }
     }
     
     function triggerScreenShake(duration) { gameContainer.classList.add('screen-shake'); setTimeout(() => gameContainer.classList.remove('screen-shake'), duration); }
+    
     function triggerFinalGlitchOut() {
         logMessage("EL MUNDO SE ESTÁ DESESTABILIZANDO...", "system-log");
         glitchOverlay.classList.remove('hidden');
         triggerScreenShake(5000);
         glitchSound.loop = true;
         glitchSound.play();
-        setTimeout(() => { document.body.style.transition = "opacity 2s"; document.body.style.opacity = 0; }, 4000);
+        
+        saveGame(); // Guardado final antes de la transición
+        
+        setTimeout(() => { 
+            document.body.style.transition = "opacity 2s"; 
+            document.body.style.opacity = 0; 
+            
+            setTimeout(() => {
+                window.location.href = 'game4.html';
+            }, 2500);
+    
+        }, 4000);
     }
 
     function updateCooldowns() { for (const key in skills) if (skills[key].currentCooldown > 0) skills[key].currentCooldown--; if(skills.escudo.active) { skills.escudo.turns--; if(skills.escudo.turns <= 0) { skills.escudo.active = false; logMessage("El escudo se ha disipado.", "system-log"); } } updateUI(); }
+    
     function updateUI() {
+        if (!player || !enemy) return;
         playerHpFill.style.width = `${(player.hp / player.maxHp) * 100}%`;
         playerHpText.textContent = `${Math.ceil(player.hp)} / ${player.maxHp}`;
-        const originalEnemy = (allRoundsEnemies[currentRound - 1] || []).find(e => e.name === enemy.name) || enemy;
-        if (enemy.hp > 0) {
-            enemySprite.src = enemy.sprite;
-            enemyName.textContent = enemy.name;
-            enemyHpFill.style.width = `${(enemy.hp / (enemy.maxHp || originalEnemy.hp)) * 100}%`;
-            enemyHpText.textContent = `${Math.ceil(enemy.hp)} / ${enemy.maxHp || originalEnemy.hp}`;
+        
+        if (enemy.name) {
+             enemySprite.src = enemy.sprite;
+             enemyName.textContent = enemy.name;
+             enemyHpFill.style.width = `${(enemy.hp / enemy.maxHp) * 100}%`;
+             enemyHpText.textContent = `${Math.ceil(enemy.hp)} / ${enemy.maxHp}`;
         } else {
+            enemyName.textContent = '---';
             enemyHpFill.style.width = '0%';
-            enemyHpText.textContent = "Derrotado";
+            enemyHpText.textContent = "---";
         }
         dataDisplay.textContent = `Datos: ${corruptData}`;
         skillButtons.forEach(btn => { const skillName = btn.dataset.skill; const skill = skills[skillName]; const overlay = btn.querySelector('.cooldown-overlay'); btn.disabled = skill.currentCooldown > 0; overlay.textContent = skill.currentCooldown > 0 ? skill.currentCooldown : ''; });
     }
+    
     function logMessage(msg, className) { const p = document.createElement('p'); p.textContent = `> ${msg}`; p.className = className; actionLog.appendChild(p); actionLog.scrollTop = actionLog.scrollHeight; }
+    
     function createFloatingText(text, element, className) { const el = document.createElement('div'); el.textContent = text; el.className = `floating-text ${className}`; const rect = element.getBoundingClientRect(); el.style.left = `${rect.left + rect.width / 2 - 20}px`; el.style.top = `${rect.top + rect.height / 2 - 10}px`; floatingTextContainer.appendChild(el); setTimeout(() => el.remove(), 2000); }
     
     // --- INICIALIZACIÓN DEL JUEGO ---
@@ -456,12 +526,12 @@ document.addEventListener('DOMContentLoaded', () => {
     deathUpgradeContinueBtn.addEventListener('click', respawnPlayer);
     startFinalBattleBtn.addEventListener('click', startFinalBattle);
     
+    loadGame(); // Cargar o inicializar el estado del juego
     const isIntroCompleted = localStorage.getItem('eg_game3_intro_completed');
     if (!isIntroCompleted) {
         introSequenceContainer.classList.remove('hidden');
         showNextDialogue();
     } else {
-        loadGame();
         gameContainer.classList.remove('hidden');
         startGame();
     }

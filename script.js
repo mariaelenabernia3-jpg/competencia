@@ -23,12 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
         optionsTaunts: { es: ["¡Ey, deja de toquetear tanto y ven a ayudarme!", "Oye, me has dejado plantado...", "¿Acaso me estás ignorando?"], en: ["Hey, stop fiddling around and come help me!", "Hey, you left me hanging...", "Are you ignoring me?"] },
         creditsTaunts: { es: ["Creo que alguien te ha ganado, Kevin.", "¿A que es inteligente?", "Acaba de darle a jugar y ayúdame."], en: ["I think someone beat you to it, Kevin.", "Smart, aren't they?", "Just press play and help me."] },
         newGamePrompt: { es: "¡Vamos! A ver si salgo de aquí.", en: "Let's go! Let's see if I can get out of here." },
-        saveSlotTitle: { es: "Seleccionar Ranura", en: "Select Slot" },
-        loadSlotTitle: { es: "Cargar Partida", en: "Load Game" },
+        saveSlotTitle: { es: "Seleccionar Ranura para Guardar", en: "Select Slot to Save" },
+        loadSlotTitle: { es: "Seleccionar Ranura para Cargar", en: "Select Slot to Load" },
         emptySlot: { es: "Vacío", en: "Empty" },
         usedSlot: { es: "Partida Guardada", en: "Saved Game" },
         newGameDialogue: { es: "Eyy... ¿a dónde estoy yendo?", en: "Hey... where am I going?" },
-        loading: { es: "Cargando...", en: "Loading..." }
+        loading: { es: "Cargando...", en: "Loading..." },
+        // NUEVO: Texto para mostrar el progreso en la ranura de guardado
+        saveSlotProgress: { es: "Acto", en: "Act" }
     };
 
     // --- Selectores de UI y Audio ---
@@ -134,17 +136,19 @@ document.addEventListener('DOMContentLoaded', () => {
         showNextLine();
     };
 
-    const showLoadingScreen = (dialogueText) => {
+    // MODIFICADO: La función de carga ahora redirige a la página correcta
+    const showLoadingScreen = (dialogueText, targetUrl) => {
         mainMenu.style.display = 'none';
         saveSlotsOverlay.classList.add('hidden');
         loadingDialogue.textContent = dialogueText;
         loadingScreen.classList.remove('hidden');
         
         setTimeout(() => {
-            window.location.href = 'game1.html';
+            window.location.href = targetUrl; // Redirige a la URL especificada
         }, 4000);
     };
     
+    // MODIFICADO: La función de renderizar ranuras ahora lee y gestiona el estado maestro
     const renderSaveSlots = (isNewGame) => {
         const title = document.getElementById('save-slots-title');
         title.textContent = isNewGame ? gameText.saveSlotTitle[currentLanguage] : gameText.loadSlotTitle[currentLanguage];
@@ -152,20 +156,42 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
         const saveSlots = JSON.parse(ls.getItem('eg_saveSlots')) || [null, null, null];
         
-        saveSlots.forEach((slot, index) => {
+        saveSlots.forEach((slotData, index) => {
             const slotEl = document.createElement('div');
             slotEl.classList.add('save-slot');
-            const statusText = slot ? `${gameText.usedSlot[currentLanguage]} - ${slot}` : gameText.emptySlot[currentLanguage];
-            if (slot) slotEl.classList.add('used');
+            let statusText;
+            if (slotData && slotData.current_game) {
+                slotEl.classList.add('used');
+                const gameAct = slotData.current_game.replace('game', '');
+                statusText = `${gameText.usedSlot[currentLanguage]} - ${gameText.saveSlotProgress[currentLanguage]} ${gameAct}`;
+            } else {
+                statusText = gameText.emptySlot[currentLanguage];
+            }
+            
             slotEl.innerHTML = `<span>Slot ${index + 1}</span><div class="slot-status">${statusText}</div>`;
+            
             slotEl.addEventListener('click', () => {
                 playClickSound();
                 if (isNewGame) {
-                    saveSlots[index] = new Date().toLocaleString();
+                    // Crea un nuevo estado maestro de juego
+                    const newMasterState = {
+                        current_game: 'game1',
+                        game1_data: null,
+                        game2_data: null,
+                        game3_data: null,
+                        game4_data: null
+                    };
+                    saveSlots[index] = newMasterState;
                     ls.setItem('eg_saveSlots', JSON.stringify(saveSlots));
-                    showLoadingScreen(gameText.newGameDialogue[currentLanguage]);
-                } else if (slot) {
-                    showLoadingScreen(gameText.loading[currentLanguage]);
+                    ls.setItem('eg_active_slot', index); // Guarda qué ranura está activa
+                    ls.setItem('eg_current_game_state', JSON.stringify(newMasterState));
+                    showLoadingScreen(gameText.newGameDialogue[currentLanguage], 'game1.html');
+                } else if (slotData) {
+                    // Carga el estado maestro de la ranura seleccionada
+                    ls.setItem('eg_active_slot', index); // Guarda qué ranura está activa
+                    ls.setItem('eg_current_game_state', JSON.stringify(slotData));
+                    const targetPage = `${slotData.current_game || 'game1'}.html`;
+                    showLoadingScreen(gameText.loading[currentLanguage], targetPage);
                 }
             });
             container.appendChild(slotEl);

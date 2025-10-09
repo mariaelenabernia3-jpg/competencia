@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- BILINGUAL TEXTS (NO CHANGES) ---
+    // --- BILINGUAL TEXTS ---
     const game2Texts = {
         introLore: { es: "???: Despierta, pequeño.", en: "???: Wake up, little one." },
         continuePrompt: { es: "[Toca para continuar]", en: "[Tap to continue]" },
@@ -138,44 +138,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const loreFragmentText = document.getElementById('lore-fragment-text');
     const closeLoreBtn = document.getElementById('close-lore-btn');
 
-    // --- GAME STATE ---
+    // --- GAME STATE & PERSISTENCE ---
     let lang = 'es';
     const GLITCH_COST_BITS = 2500;
     const GLITCH_COST_ENERGY = 50;
-    const defaultGameState = {
-        bits: 0, energy: 50, maxEnergy: 100, pcLevel: 1, bitsPerSecond: 0,
-        items: {
-            cama: { owned: false, cost: 150, energyBonus: 50 },
-            mesa: { owned: false, cost: 100, energyBonus: 25 },
-            silla: { owned: false, cost: 75, energyBonus: 15 },
-            cooler: { owned: false, cost: 250, effect: () => {} },
-            ram: { owned: false, cost: 400, effect: () => {} },
-            autoclicker: { owned: false, cost: 1000, effect: () => { gameState.bitsPerSecond += 5; }},
-        },
-        stats: { gamesCreated: 0, totalBitsEarned: 0, hackersDefeated: 0 },
-        unlockedAchievements: [],
-        unlockedLoreIds: []
-    };
     let gameState = {};
     let characterMessageTimeout;
     let lowEnergyMessageShown = false;
+    const activeSlot = localStorage.getItem('eg_active_slot');
     
-    // --- PERSISTENCE ---
     function saveGame() {
-        localStorage.setItem('eg_game2_save', JSON.stringify(gameState));
+        if (activeSlot === null) return;
+        try {
+            let masterState = JSON.parse(localStorage.getItem('eg_current_game_state'));
+            if (!masterState) masterState = {};
+
+            masterState.current_game = 'game2';
+            masterState.game2_data = gameState;
+            
+            localStorage.setItem('eg_current_game_state', JSON.stringify(masterState));
+            
+            let allSlots = JSON.parse(localStorage.getItem('eg_saveSlots'));
+            if (allSlots && allSlots[activeSlot] !== undefined) {
+                allSlots[activeSlot] = masterState;
+                localStorage.setItem('eg_saveSlots', JSON.stringify(allSlots));
+            }
+        } catch (e) {
+            console.error("Error guardando el juego:", e);
+        }
     }
 
     function loadGame() {
-        const savedGame = localStorage.getItem('eg_game2_save');
-        let parsedGame = null;
-        try { parsedGame = JSON.parse(savedGame); } catch (error) { console.error("Error parsing saved data:", error); }
-        if (parsedGame && typeof parsedGame === 'object') {
-            gameState = { ...defaultGameState, ...parsedGame, items: { ...defaultGameState.items, ...parsedGame.items }, stats: { ...defaultGameState.stats, ...parsedGame.stats } };
-        } else {
+        const defaultGameState = {
+            bits: 0, energy: 50, maxEnergy: 100, pcLevel: 1, bitsPerSecond: 0,
+            items: {
+                cama: { owned: false, cost: 150, energyBonus: 50 },
+                mesa: { owned: false, cost: 100, energyBonus: 25 },
+                silla: { owned: false, cost: 75, energyBonus: 15 },
+                cooler: { owned: false, cost: 250, effect: () => {} },
+                ram: { owned: false, cost: 400, effect: () => {} },
+                autoclicker: { owned: false, cost: 1000, effect: () => { gameState.bitsPerSecond += 5; }},
+            },
+            stats: { gamesCreated: 0, totalBitsEarned: 0, hackersDefeated: 0 },
+            unlockedAchievements: [],
+            unlockedLoreIds: []
+        };
+        try {
+            let masterState = JSON.parse(localStorage.getItem('eg_current_game_state'));
+            if (masterState && masterState.game2_data) {
+                // Combina el estado guardado con el por defecto para evitar errores si se añaden nuevas propiedades
+                gameState = {
+                    ...defaultGameState,
+                    ...masterState.game2_data,
+                    items: { ...defaultGameState.items, ...masterState.game2_data.items },
+                    stats: { ...defaultGameState.stats, ...masterState.game2_data.stats }
+                };
+            } else {
+                gameState = JSON.parse(JSON.stringify(defaultGameState));
+            }
+        } catch (e) {
+            console.error("Error cargando el juego, se usará estado por defecto:", e);
             gameState = JSON.parse(JSON.stringify(defaultGameState));
         }
         lang = localStorage.getItem('eg_language') || 'es';
     }
+
 
     // --- UI FUNCTIONS ---
     function applyText() {
@@ -287,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         achievementToast.classList.add('show');
         setTimeout(() => { achievementToast.classList.remove('show'); }, 4000);
         showCharacterMessage(achievement.dialogueKey, 7000);
+        saveGame();
     }
     function renderAchievementsList() {
         achievementsListContainer.innerHTML = '';
@@ -308,10 +336,11 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState.stats.totalBitsEarned += amount;
         if (sourceElement && amount > 0) createFloatingNumber(`+${Math.floor(amount)}`, sourceElement, 'gain');
         checkAchievements();
+        updateUI(); // Update UI immediately after adding bits
     }
     function initializeGame() {
         setInterval(() => {
-            if (gameState.bitsPerSecond > 0) { addBits(gameState.bitsPerSecond, bpsDisplay); updateUI(); saveGame(); }
+            if (gameState.bitsPerSecond > 0) { addBits(gameState.bitsPerSecond, bpsDisplay); }
             if (gameState.energy < 20 && !lowEnergyMessageShown) { showCharacterMessage('dialogueLowEnergy', 4000); lowEnergyMessageShown = true; }
             else if (gameState.energy >= 20) { lowEnergyMessageShown = false; }
         }, 1000);
@@ -323,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (rand < 0.18) spawnDataPacket();
             }
         }, 10000);
+        setInterval(saveGame, 2000); // Guardado automático
         updateUI();
     }
     
@@ -343,11 +373,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameProgress >= 100) {
             let bitsEarned = 50 + (gameState.pcLevel * 10);
             if (gameState.items.ram.owned) bitsEarned *= 1.5;
-            addBits(bitsEarned, minigamePanel); gameState.stats.gamesCreated++; checkAchievements();
+            addBits(bitsEarned, minigamePanel); gameState.stats.gamesCreated++;
             showCharacterMessage('gameCreated');
             minigamePanel.classList.add('hidden');
-            disableAllActions(false); updateUI(); saveGame();
+            disableAllActions(false);
             tryToFindLore();
+            saveGame();
         }
     });
     eatBtn.addEventListener('click', (e) => {
@@ -367,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             addBits(20 + (gameState.pcLevel * 5), e.currentTarget);
             showCharacterMessage('miningSuccess');
-            disableAllActions(false); updateUI(); saveGame();
+            disableAllActions(false); saveGame();
         }, 3000);
     });
     unstableCompileBtn.addEventListener('click', (e) => {
@@ -379,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             if (Math.random() < 0.25) { addBits(500, e.currentTarget); showCharacterMessage('compileSuccess'); }
             else { gameState.energy = Math.max(0, gameState.energy - 20); createFloatingNumber(`-20`, energyDisplay, 'loss'); showCharacterMessage('compileFail'); }
-            disableAllActions(false); updateUI(); saveGame();
+            disableAllActions(false); saveGame();
         }, 3000);
     });
     
@@ -414,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedIndex === correctLineIndex) { addBits(150, sourceElement); debugResultText.textContent = game2Texts.debugSuccess[lang]; tryToFindLore(); }
         else { debugResultText.textContent = game2Texts.debugFail[lang]; }
         document.querySelectorAll('.code-line').forEach(line => line.style.pointerEvents = 'none');
-        setTimeout(() => { debugPanel.classList.add('hidden'); disableAllActions(false); updateUI(); saveGame(); }, 2500);
+        setTimeout(() => { debugPanel.classList.add('hidden'); disableAllActions(false); saveGame(); }, 2500);
     }
 
     // --- POSITIVE EVENT & HACKER MINIGAME ---
@@ -423,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dataPacket.style.left = `${Math.random() * (window.innerWidth - 60) + 10}px`;
         dataPacket.style.top = `${Math.random() * (window.innerHeight - 200) + 10}px`;
         dataPacket.classList.remove('hidden');
-        const onPacketClick = () => { addBits(50 + Math.floor(Math.random() * 50), dataPacket); dataPacket.classList.add('hidden'); updateUI(); saveGame(); };
+        const onPacketClick = () => { addBits(50 + Math.floor(Math.random() * 50), dataPacket); dataPacket.classList.add('hidden'); saveGame(); };
         dataPacket.addEventListener('click', onPacketClick, { once: true });
         setTimeout(() => { if (!dataPacket.classList.contains('hidden')) dataPacket.classList.add('hidden'); }, 7000);
     }
@@ -451,14 +482,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function endHackerFight(playerWon) {
         clearInterval(hackerInterval); hackerTapBtn.disabled = true; hackerCloseBtn.classList.remove('hidden');
         if (playerWon) {
-            addBits(30, hackerMinigamePanel); gameState.stats.hackersDefeated++; checkAchievements();
+            addBits(30, hackerMinigamePanel); gameState.stats.hackersDefeated++;
             hackerResultText.textContent = game2Texts.hackerWin[lang];
         } else {
             createFloatingNumber('-25', energyDisplay, 'loss');
             gameState.energy = Math.max(0, gameState.energy - 25);
             hackerResultText.textContent = game2Texts.hackerLoss[lang];
         }
-        updateUI(); saveGame();
+        saveGame();
     }
     hackerCloseBtn.addEventListener('click', () => { hackerMinigamePanel.classList.add('hidden'); disableAllActions(false); updateUI(); });
     
@@ -466,30 +497,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function triggerGlitchEffect() {
         if (gameState.bits < GLITCH_COST_BITS || gameState.energy < GLITCH_COST_ENERGY) { showCharacterMessage('glitchNoResources'); return; }
         
-        // Inicia la secuencia de Glitch
         disableAllActions();
         createFloatingNumber(`-${GLITCH_COST_ENERGY}`, energyDisplay, 'loss');
         gameState.bits -= GLITCH_COST_BITS; gameState.energy -= GLITCH_COST_ENERGY;
-        saveGame(); updateUI(); showCharacterMessage('glitchTriggered');
+        showCharacterMessage('glitchTriggered');
+        
+        saveGame(); // Guardar justo antes de la transición
         
         if(glitchSound) {
-            glitchSound.loop = true; // El sonido se repetirá para más caos
+            glitchSound.loop = true;
             glitchSound.volume = localStorage.getItem('eg_sfxVolume') || 1.0;
             glitchSound.play();
         }
 
-        // 1. Glitch de la interfaz principal
         mainInterface.classList.add('glitching');
         
-        // 2. Aparece el overlay final después de un momento
-        setTimeout(() => {
-            glitchOverlay.classList.remove('hidden');
-        }, 500);
+        setTimeout(() => { glitchOverlay.classList.remove('hidden'); }, 500);
 
-        // 3. Redirige después de que todo termine
-        setTimeout(() => {
-            window.location.href = 'game3.html';
-        }, 3500);
+        setTimeout(() => { window.location.href = 'game3.html'; }, 3500);
     }
     createGlitchBtn.addEventListener('click', triggerGlitchEffect);
     shopBtn.addEventListener('click', () => { renderShop(); shopOverlay.classList.remove('hidden'); });
@@ -523,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function buyItem(itemId) {
         if (itemId === 'pc') {
             const cost = 50 * Math.pow(2, gameState.pcLevel);
-            if (gameState.bits >= cost) { gameState.bits -= cost; gameState.pcLevel++; checkAchievements(); }
+            if (gameState.bits >= cost) { gameState.bits -= cost; gameState.pcLevel++; }
         } else {
             const item = gameState.items[itemId];
             if (gameState.bits >= item.cost && !item.owned) {
@@ -542,7 +567,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         if (gameState.pcLevel >= 5 && createGlitchBtn.disabled) showCharacterMessage('glitchReady');
-        updateUI(); renderShop(); saveGame();
+        renderShop();
+        saveGame();
     }
 
     // --- INITIALIZATION ---

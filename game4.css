@@ -1,0 +1,222 @@
+:root {
+    --primary-color: #00ff00;
+    --background-color: #1a1a1a;
+    --panel-bg: rgba(10, 0, 20, 0.8);
+    --border-color: #4d004d;
+    --glitch-color: #ff00ff;
+    --table-color: #35654d;
+    --card-bg: #e0e0e0;
+    --card-border: #333;
+    --text-light: #f0f0f0;
+    --text-dark: #111;
+
+    --suit-spades: #2c3e50;
+    --suit-hearts: #e74c3c;
+    --suit-clubs: #2c3e50;
+    --suit-diamonds: #e74c3c;
+}
+
+body {
+    background-color: var(--background-color);
+    background-image: 
+        linear-gradient(rgba(13, 13, 13, 0.9), rgba(13, 13, 13, 0.9)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%2335654d' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4V0h1v4h9V0h1v4h9V0h1v4h9V0h1v4h9V0h1v4h9V0h1v4h9V0h1v4h9V0h1v4h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm-80-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm-80-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm-80-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    color: var(--text-light);
+    font-family: 'VT323', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+#retro-filter {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(20, 255, 90, 0.08);
+    background-image: repeating-linear-gradient(transparent, rgba(0,0,0,0.3) 1px, transparent 2px);
+    mix-blend-mode: overlay; pointer-events: none; z-index: 9999;
+}
+
+#game-container {
+    width: 100%; max-width: 1200px; height: 100%; max-height: 800px;
+    display: flex; flex-direction: column; padding: 20px; gap: 15px; box-sizing: border-box;
+}
+
+.panel {
+    background-color: var(--panel-bg); border: 2px solid var(--border-color);
+    box-shadow: 0 0 15px var(--glitch-color); border-radius: 5px;
+    padding: 10px; display: flex; flex-direction: column;
+}
+.panel-header {
+    font-family: 'Press Start 2P', cursive; font-size: 0.9rem;
+    color: var(--primary-color); margin-bottom: 10px; text-align: center;
+    border-bottom: 1px solid var(--border-color); padding-bottom: 5px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+#top-row { display: flex; gap: 15px; height: 170px; }
+#modificadores-display { flex-grow: 3; }
+#modificadores-list { display: flex; gap: 10px; flex-wrap: wrap; overflow-y: auto; }
+.modificador {
+    background-color: #222; border: 1px solid var(--primary-color); padding: 5px;
+    border-radius: 4px; text-align: center; font-size: 0.9rem; width: 100px;
+}
+.modificador h4 { margin: 0 0 5px 0; font-size: 1rem; color: var(--glitch-color); }
+.modificador p { margin: 0; font-size: 0.8rem; }
+
+#puntuacion-display { flex-grow: 1; text-align: center; justify-content: space-around; }
+#puntuacion-display h3 { font-family: 'Press Start 2P', cursive; font-size: 1.5rem; margin: 0; color: #fff; }
+#puntuacion-display p { margin: 0 0 2px 0; color: #aaa; font-size: 0.9rem;}
+#total-score { color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color); font-size: 2.2rem; }
+#target-score { color: var(--glitch-color); text-shadow: 0 0 5px var(--glitch-color); }
+
+#mesa-de-juego { height: 180px; background-color: rgba(53, 101, 77, 0.5); }
+#cartas-jugadas-container { display: flex; justify-content: center; align-items: center; gap: 10px; height: 100%; }
+
+.played-card-animation { animation: play-card-effect 1.5s forwards; }
+@keyframes play-card-effect {
+    0% { transform: scale(0.8); opacity: 0; }
+    20% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 20px var(--primary-color); }
+    80% { transform: scale(1); opacity: 1; box-shadow: none; }
+    100% { transform: scale(0.9); opacity: 0; }
+}
+
+#bottom-row { display: flex; gap: 15px; flex-grow: 1; }
+#mano-jugador-container { flex-grow: 3; }
+#mano-jugador-container .panel-header { justify-content: center; position: relative; }
+#mano-jugador-container .panel-header span { position: absolute; left: 50%; transform: translateX(-50%); }
+#sort-buttons-container { position: absolute; right: 5px; }
+#sort-buttons-container button {
+    font-family: 'VT323', monospace; font-size: 1rem; background: transparent;
+    border: 1px solid var(--primary-color); color: var(--primary-color);
+    padding: 2px 8px; margin-left: 5px; cursor: pointer; border-radius: 3px;
+}
+#mano-jugador { display: flex; justify-content: center; align-items: center; gap: 10px; height: 100%; flex-wrap: wrap; }
+
+.card {
+    width: 80px; height: 110px; background-color: var(--card-bg); border: 2px solid var(--card-border);
+    border-radius: 6px; color: var(--text-dark); display: flex; flex-direction: column;
+    justify-content: center; align-items: center; font-family: 'Press Start 2P', cursive;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; user-select: none; position: relative;
+}
+.card:hover { transform: translateY(-10px); }
+.card.selected { border-color: var(--primary-color); box-shadow: 0 0 15px var(--primary-color); transform: translateY(-5px); }
+.card .rank { font-size: 2rem; }
+.card .suit { font-size: 1.5rem; position: absolute; bottom: 5px; }
+.suit-♠, .suit-♣ { color: var(--suit-spades); }
+.suit-♥, .suit-♦ { color: var(--suit-hearts); }
+
+#acciones-container { flex-grow: 1; text-align: center; justify-content: space-between; }
+#game-stats { font-size: 1.2rem; }
+#game-stats p { margin: 5px 0; }
+#money-display, #round-display { color: var(--primary-color); }
+#hands-display, #discards-display { color: #fff; }
+#action-buttons button {
+    font-family: 'Press Start 2P', cursive; font-size: 1rem; width: 100%; padding: 15px 10px; margin-bottom: 10px;
+    border: 2px solid var(--primary-color); background-color: transparent; color: var(--primary-color); cursor: pointer;
+}
+#action-buttons button:disabled { border-color: #555; color: #555; cursor: not-allowed; }
+#hand-name-display { font-size: 1.3rem; color: var(--xp-color, #00ffff); }
+
+/* --- JOKER, INSTRUCCIONES Y DIÁLOGO --- */
+#joker-character {
+    position: fixed; bottom: 20px; left: 20px; width: 90px; height: 120px;
+    background: linear-gradient(45deg, var(--glitch-color), #8a2be2);
+    border: 3px solid var(--primary-color); border-radius: 8px;
+    color: var(--primary-color); font-family: 'Press Start 2P', cursive;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.2rem; text-shadow: 2px 2px #000; z-index: 500;
+    animation: float-anim 4s infinite ease-in-out;
+}
+@keyframes float-anim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+#instructions-btn {
+    position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+    border-radius: 50%; border: 2px solid var(--primary-color);
+    background-color: var(--panel-bg); color: var(--primary-color);
+    font-family: 'Press Start 2P', cursive; font-size: 1.5rem;
+    cursor: pointer; z-index: 500;
+}
+
+#character-dialogue-bubble {
+    position: fixed; bottom: 150px; left: 20px;
+    background: var(--panel-bg); border: 2px solid var(--border-color);
+    padding: 15px 20px; border-radius: 10px; font-size: 1.3rem;
+    max-width: 300px; text-align: center; z-index: 500;
+    animation: fade-in-out 5s forwards;
+}
+#character-dialogue-bubble::after {
+    content: ''; position: absolute; bottom: -12px; left: 30px;
+    border-left: 10px solid transparent; border-right: 10px solid transparent;
+    border-top: 10px solid var(--border-color);
+}
+@keyframes fade-in-out {
+    0% { opacity: 0; transform: translateY(10px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(10px); }
+}
+
+/* --- OVERLAYS --- */
+#intro-overlay, #shop-overlay, #cinematic-overlay, #win-overlay, #instructions-overlay, #lore-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.95); z-index: 1000;
+    display: flex; justify-content: center; align-items: center; text-align: center;
+    padding: 20px; box-sizing: border-box;
+}
+#intro-dialogue-box, .shop-panel, .win-panel, .instructions-panel, .lore-panel {
+    background: var(--panel-bg); border: 2px solid var(--border-color); padding: 2rem;
+    max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto;
+}
+.instructions-panel { max-width: 800px; }
+#intro-dialogue { font-size: 1.5rem; min-height: 100px; }
+
+#intro-continue-btn, #shop-continue-btn, #play-again-btn, #close-instructions-btn, #close-lore-btn {
+    font-family: 'Press Start 2P', cursive; font-size: 1.2rem; padding: 10px 20px;
+    color: var(--primary-color); background-color: transparent;
+    border: 2px solid var(--primary-color); cursor: pointer;
+    box-shadow: 0 0 10px var(--primary-color); margin-top: 20px;
+}
+
+.win-panel h2, .lore-panel h3 { font-family: 'Press Start 2P', cursive; color: var(--glitch-color); }
+.win-panel p, .lore-panel p { font-size: 1.2rem; }
+#cinematic-overlay { background-color: #000; }
+#cinematic-overlay h1 { font-family: 'Press Start 2P', cursive; font-size: clamp(3rem, 12vw, 6rem); }
+#cinematic-overlay h2 { font-size: clamp(1.5rem, 7vw, 3rem); color: var(--primary-color); }
+
+.shop-panel h2 { font-family: 'Press Start 2P', cursive; color: var(--primary-color); }
+#shop-items { display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+.shop-item {
+    background: #222; border: 1px solid var(--border-color); padding: 15px;
+    width: 200px; cursor: pointer; transition: background-color 0.2s;
+}
+.shop-item:hover { background-color: var(--border-color); }
+.shop-item h3 { margin: 0 0 10px; color: var(--glitch-color); }
+.shop-item p { margin: 0 0 10px; font-size: 0.9rem; }
+.shop-item .cost { font-weight: bold; font-size: 1.2rem; color: var(--primary-color); }
+.shop-item .purchase-type { font-style: italic; color: #ccc; font-size: 0.8rem; display: block; margin-top: 5px; }
+
+.instructions-panel table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.instructions-panel th, .instructions-panel td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+.instructions-panel th { background-color: #333; font-family: 'Press Start 2P', cursive; font-size: 1rem; }
+.instructions-panel td code { background-color: #222; padding: 2px 5px; border-radius: 3px; font-family: 'VT323', monospace; font-size: 1.1rem; }
+
+@media (max-width: 900px) {
+    #game-container { flex-direction: column; max-height: none; height: 100vh; padding: 10px; gap: 10px; }
+    #top-row, #bottom-row { flex-direction: column; height: auto; }
+    #top-row { order: -1; }
+    .card { width: 60px; height: 90px; }
+    .card .rank { font-size: 1.5rem; }
+    .card .suit { font-size: 1.2rem; }
+    #mano-jugador { flex-wrap: wrap; align-content: flex-start; }
+    #mesa-de-juego { height: 140px; }
+    .panel-header span { position: static; transform: none; }
+    #sort-buttons-container { width: 100%; margin-top: 5px; text-align: center;}
+    #joker-character { transform: scale(0.8); bottom: 10px; left: 10px; }
+    #character-dialogue-bubble { left: 10px; bottom: 120px; max-width: 80vw; font-size: 1rem; }
+    #instructions-btn { transform: scale(0.9); bottom: 10px; right: 10px; }
+    .instructions-panel th, .instructions-panel td { padding: 5px; font-size: 0.9rem; }
+}

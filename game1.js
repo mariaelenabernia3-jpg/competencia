@@ -56,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let timedDialogue = { text: null, timer: 0 };
     let goodCoinsCollected = 0;
-    let hasJumpedOnce = false, hasCollectedFirstCoin = false, hasTriggered7CoinDialogue = false;
-    let hasTakenDamage = false, hasTriggeredSystemSequence = false;
+    let hasJumpedOnce, hasCollectedFirstCoin, hasTriggered7CoinDialogue;
+    let hasTakenDamage, hasTriggeredSystemSequence;
     let isTransitioning = false;
 
     const TIMED_DIALOGUE_DURATION = 300;
@@ -68,6 +68,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let player, camera, platforms, decorations, coins, score, health;
     let groundPattern = null;
+
+    // NUEVO: Funciones de guardado y carga
+    const activeSlot = localStorage.getItem('eg_active_slot');
+
+    function saveGameState() {
+        if (activeSlot === null) return;
+
+        const stateToSave = {
+            score, health, player,
+            coins: coins.map(c => ({ x: c.x, y: c.y, isVisible: c.isVisible, isBad: c.isBad })),
+            flags: { hasJumpedOnce, hasCollectedFirstCoin, hasTriggered7CoinDialogue, hasTakenDamage, hasTriggeredSystemSequence, goodCoinsCollected }
+        };
+
+        try {
+            let masterState = JSON.parse(localStorage.getItem('eg_current_game_state'));
+            if (!masterState) masterState = {};
+            
+            masterState.current_game = 'game1';
+            masterState.game1_data = stateToSave;
+            
+            localStorage.setItem('eg_current_game_state', JSON.stringify(masterState));
+            
+            let allSlots = JSON.parse(localStorage.getItem('eg_saveSlots'));
+            if (allSlots && allSlots[activeSlot] !== undefined) {
+                allSlots[activeSlot] = masterState;
+                localStorage.setItem('eg_saveSlots', JSON.stringify(allSlots));
+            }
+        } catch (e) {
+            console.error("Error guardando el juego:", e);
+        }
+    }
+
+    function loadGameState() {
+        if (activeSlot === null) return false;
+
+        try {
+            let masterState = JSON.parse(localStorage.getItem('eg_current_game_state'));
+            if (masterState && masterState.game1_data) {
+                const saved = masterState.game1_data;
+                score = saved.score;
+                health = saved.health;
+                player = saved.player;
+                coins = saved.coins;
+                hasJumpedOnce = saved.flags.hasJumpedOnce;
+                hasCollectedFirstCoin = saved.flags.hasCollectedFirstCoin;
+                hasTriggered7CoinDialogue = saved.flags.hasTriggered7CoinDialogue;
+                hasTakenDamage = saved.flags.hasTakenDamage;
+                hasTriggeredSystemSequence = saved.flags.hasTriggeredSystemSequence;
+                goodCoinsCollected = saved.flags.goodCoinsCollected;
+                return true;
+            }
+        } catch (e) {
+            console.error("Error cargando el juego:", e);
+        }
+        return false;
+    }
+
 
     function loadAssets(callback) {
         let loadedCount = 0; const totalAssets = Object.keys(ASSET_SOURCES).length;
@@ -80,19 +137,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeGame() {
-        score = 0; health = 100;
-        player = { x: 100, y: 400, width: 45, height: 52, velocityX: 0, velocityY: 0, isJumping: false, currentFrame: IDLE_FRAME, frameTimer: 0, facingDirection: 'right' };
         camera = { x: 0, y: 0 };
         timedDialogue = { text: null, timer: 0 };
-        goodCoinsCollected = 0;
-        hasJumpedOnce = false; hasCollectedFirstCoin = false; hasTriggered7CoinDialogue = false;
-        hasTakenDamage = false; hasTriggeredSystemSequence = false;
         isTransitioning = false;
+        
+        if (!loadGameState()) {
+            score = 0; health = 100;
+            player = { x: 100, y: 400, width: 45, height: 52, velocityX: 0, velocityY: 0, isJumping: false, currentFrame: IDLE_FRAME, frameTimer: 0, facingDirection: 'right' };
+            goodCoinsCollected = 0;
+            hasJumpedOnce = false; hasCollectedFirstCoin = false; hasTriggered7CoinDialogue = false;
+            hasTakenDamage = false; hasTriggeredSystemSequence = false;
+            platforms = [ { x: -1000, y: 590, width: 10000, height: 50 }, { x: 200, y: 450, width: 150, height: 20 }, { x: 450, y: 350, width: 150, height: 20 }, { x: 700, y: 450, width: 200, height: 20 }, { x: 1000, y: 400, width: 150, height: 20 }, { x: 1200, y: 300, width: 150, height: 20 }, { x: 1400, y: 200, width: 50, height: 20 }, { x: 1600, y: 350, width: 250, height: 20 }, { x: 1950, y: 280, width: 150, height: 20 } ];
+            decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DECORATION_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
+            coins = [ { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false }, { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false }, { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false }, ];
+        }
+        
         if (assets.ground) { groundPattern = ctx.createPattern(assets.ground, 'repeat'); }
-        platforms = [ { x: -1000, y: 590, width: 10000, height: 50 }, { x: 200, y: 450, width: 150, height: 20 }, { x: 450, y: 350, width: 150, height: 20 }, { x: 700, y: 450, width: 200, height: 20 }, { x: 1000, y: 400, width: 150, height: 20 }, { x: 1200, y: 300, width: 150, height: 20 }, { x: 1400, y: 200, width: 50, height: 20 }, { x: 1600, y: 350, width: 250, height: 20 }, { x: 1950, y: 280, width: 150, height: 20 } ];
-        decorations = [ { x: 495, y: 350 - DECORATION_SIZE, assetKey: 'decor1' }, { x: 600, y: 590 - DECORATION_SIZE, assetKey: 'decor2' }, { x: 720, y: 450 - DECORATION_SIZE, assetKey: 'decor3' }, { x: 900, y: 590 - DECORATION_SIZE, assetKey: 'decor4' }, { x: 1250, y: 300 - DECORATION_SIZE, assetKey: 'decor5' }, { x: 1620, y: 350 - DECORATION_SIZE, assetKey: 'decor6' }, ];
-        coins = [ { x: 250, y: 400, isVisible: true, isBad: false }, { x: 285, y: 400, isVisible: true, isBad: false }, { x: 500, y: 300, isVisible: true, isBad: false }, { x: 535, y: 300, isVisible: true, isBad: false }, { x: 800, y: 400, isVisible: true, isBad: true }, { x: 1050, y: 350, isVisible: true, isBad: false }, { x: 1250, y: 250, isVisible: true, isBad: false }, { x: 1405, y: 150, isVisible: true, isBad: false }, { x: 1700, y: 300, isVisible: true, isBad: false }, { x: 1735, y: 300, isVisible: true, isBad: false }, ];
+        
         gameLoop();
+        setInterval(saveGameState, 5000); // Guardado periódico
     }
 
     const keys = { ArrowLeft: false, ArrowRight: false, Space: false };
@@ -111,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timedDialogue.timer = 240;
         healOverlay.classList.add('hidden');
         gameState = 'PLAYING';
+        saveGameState(); // Guardar al curarse
     });
 
     function updateSplashScreen() {
@@ -214,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (goodCoinsCollected === 9 && !isTransitioning) {
                         isTransitioning = true;
+                        saveGameState(); // Guardado final antes de transicionar
                         loadingDialogue.textContent = gameTexts.transitionDialogue[currentLanguage];
                         loadingScreen.classList.remove('hidden');
                         setTimeout(() => {
@@ -221,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, 4000);
                     }
                 }
+                saveGameState(); // Guardar al coger moneda
             }
         }
         player.frameTimer++;

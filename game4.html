@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>El Glitch Existencial - Etapa 4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="game4.css">
+</head>
+<body>
+
+    <div id="retro-filter"></div>
+
+    <!-- OVERLAYS DEL JUEGO -->
+    <div id="intro-overlay">
+        <div id="intro-dialogue-box">
+            <p id="intro-dialogue"></p>
+            <button id="intro-continue-btn" class="hidden">Continuar</button>
+        </div>
+    </div>
+    <div id="cinematic-overlay" class="hidden">
+        <div>
+            <h1>Acto 4</h1>
+            <h2>Balitro</h2>
+        </div>
+    </div>
+    <div id="win-overlay" class="hidden">
+        <div class="win-panel">
+            <h2>>_ CONEXIÓN INTERRUMPIDA</h2>
+            <p>Has forzado un error en el sistema... Has ganado, por ahora. El Administrador sabe que estás aquí. Te está observando. La siguiente simulación será diferente.</p>
+            <button id="play-again-btn">Volver a Jugar</button>
+        </div>
+    </div>
+    <div id="shop-overlay" class="hidden">
+        <div class="shop-panel">
+            <h2>> TIENDA DE DATOS FRAGMENTADOS</h2>
+            <p>El sistema se reensambla. Adquiere nuevas anomalías antes del siguiente ciclo.</p>
+            <div id="shop-items"></div>
+            <button id="shop-continue-btn">Siguiente Ronda</button>
+        </div>
+    </div>
+    <div id="instructions-overlay" class="hidden">
+        <div class="instructions-panel">
+            <h2>INSTRUCCIONES DEL SISTEMA</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mano</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo</th>
+                    </tr>
+                </thead>
+                <tbody id="instructions-table-body">
+                    <!-- Contenido generado por JS -->
+                </tbody>
+            </table>
+            <button id="close-instructions-btn">Cerrar</button>
+        </div>
+    </div>
+    <div id="lore-overlay" class="hidden">
+        <div class="lore-panel">
+            <h3>>_ Fragmento de Datos Recuperado</h3>
+            <p id="lore-fragment-text"></p>
+            <button id="close-lore-btn">Continuar</button>
+        </div>
+    </div>
+
+    
+    <!-- ELEMENTOS FIJOS DE LA UI -->
+    <div id="joker-character">JOKER</div>
+    <div id="character-dialogue-bubble" class="hidden"></div>
+    <button id="instructions-btn">?</button>
+
+
+    <!-- CONTENEDOR PRINCIPAL DEL JUEGO -->
+    <div id="game-container" class="hidden">
+        <div id="top-row">
+            <div id="modificadores-display" class="panel">
+                <div class="panel-header">MODIFICADORES ACTIVOS</div>
+                <div id="modificadores-list"></div>
+            </div>
+            <div id="puntuacion-display" class="panel">
+                <div class="panel-header">PUNTUACIÓN</div>
+                <div id="score-info">
+                    <p>Mano Actual</p>
+                    <h3 id="current-hand-score">0</h3>
+                </div>
+                <div id="total-score-info">
+                    <p>Puntuación Total</p>
+                    <h3 id="total-score">0</h3>
+                </div>
+                <div id="target-info">
+                    <p>Puntos Objetivo</p>
+                    <h3 id="target-score">100</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="mesa-de-juego" class="panel">
+            <div class="panel-header">MANO A JUGAR</div>
+            <div id="cartas-jugadas-container"></div>
+        </div>
+
+        <div id="bottom-row">
+            <div id="mano-jugador-container" class="panel">
+                <div class="panel-header">
+                    <span>TUS CARTAS</span>
+                    <div id="sort-buttons-container">
+                        <button id="sort-by-rank-btn">Ordenar por Valor</button>
+                        <button id="sort-by-suit-btn">Ordenar por Palo</button>
+                    </div>
+                </div>
+                <div id="mano-jugador"></div>
+            </div>
+            <div id="acciones-container" class="panel">
+                <div id="game-stats">
+                    <p>Ronda: <span id="round-display">1</span> / 5</p>
+                    <p>Dinero: $<span id="money-display">0</span></p>
+                    <p>Manos: <span id="hands-display">4</span></p>
+                    <p>Descartes: <span id="discards-display">3</span></p>
+                </div>
+                <div id="action-buttons">
+                    <button id="play-hand-btn">Jugar Mano</button>
+                    <button id="discard-hand-btn">Descartar</button>
+                </div>
+                <div id="hand-name-display">
+                    <p>--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game4.js"></script>
+</body>
+</html>
